@@ -1,0 +1,7 @@
+<!--this is wear all the UI strings should be for easy access-->
+<resources>
+    <string name="app_name">My Application</string>
+    <string name="edit_message">Enter a message</string>
+    <string name="button_send">Send</string>
+    <string name="gpsbutton">Get Location</string>
+</resources>
