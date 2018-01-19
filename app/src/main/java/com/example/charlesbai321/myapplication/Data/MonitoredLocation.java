@@ -27,6 +27,8 @@ public class MonitoredLocation implements Parcelable {
     //anyway, and just return LatLng when I need it
     @ColumnInfo(name = "name")
     public String name;
+    @ColumnInfo(name = "nick_name")
+    public String nickName;
     @ColumnInfo(name = "latitude_position")
     public double latitude;
     @ColumnInfo(name = "longitude_position")
@@ -34,21 +36,22 @@ public class MonitoredLocation implements Parcelable {
     @ColumnInfo(name = "time_spent")
     public int time_spent;
 
-    public MonitoredLocation(String name, double latitude, double longitude, int time_spent){
-
+    public MonitoredLocation(){
     }
 
     @Ignore
-    public MonitoredLocation(String name, LatLng location){
+    public MonitoredLocation(String name, String nickName, LatLng location){
         this.name = name;
+        this.nickName = nickName;
         this.latitude = location.latitude;
         this.longitude = location.longitude;
         time_spent = 0;
     }
 
     @Ignore
-    public MonitoredLocation(String name, LatLng location, int time_spent){
+    public MonitoredLocation(String name, String nickName, LatLng location, int time_spent){
         this.name = name;
+        this.nickName = nickName;
         this.latitude = location.latitude;
         this.longitude = location.longitude;
         this.time_spent = time_spent;
@@ -56,6 +59,18 @@ public class MonitoredLocation implements Parcelable {
 
     void addMinutes(int minutes){
         time_spent += minutes;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public LatLng getLocation(){
+        return new LatLng(latitude, longitude);
+    }
+
+    public void setId(int id){
+        this.id = id;
     }
 
     @Override
@@ -99,18 +114,6 @@ public class MonitoredLocation implements Parcelable {
         this.time_spent = Integer.parseInt(data[3]);
         this.latitude = lat;
         this.longitude = lng;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public LatLng getLocation(){
-        return new LatLng(latitude, longitude);
-    }
-
-    public void setId(int id){
-        this.id = id;
     }
 }
 

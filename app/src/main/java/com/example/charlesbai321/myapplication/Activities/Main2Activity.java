@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.charlesbai321.myapplication.Data.MonitoredLocation;
 import com.example.charlesbai321.myapplication.Data.MonitoredLocationsDatabase;
@@ -87,17 +88,21 @@ public class Main2Activity extends AppCompatActivity implements OnMapReadyCallba
     //this is called by clicking on the button, initialized it there as not to clutter activity
 
     public void addPlace(View view){
-        MonitoredLocation monitoredplace = new MonitoredLocation(thisplace.getName().toString(),
-                thisplace.getLatLng());
-        //we're going to let all this run on the main thread because we want to be sure that
-        //it gets added before the application is closed, destroyed, etc
-        MonitoredLocationsDatabase db = Room.databaseBuilder(this,
-                MonitoredLocationsDatabase.class, MonitoredLocation.DATABASE_KEY)
-                .allowMainThreadQueries().build();
-        //TODO: check if there is going to be any discrepancy between database and
-        //TODO: the static temporary list created on the MainActivityThread
-        MainActivity.places.add(monitoredplace);
-        db.monitoredLocationDao().insertAll(monitoredplace);
+        if(thisplace != null) {
+            MonitoredLocation monitoredplace = new MonitoredLocation(thisplace.getName().toString(),
+                    thisplace.getName().toString(), thisplace.getLatLng());
+            //we're going to let all this run on the main thread because we want to be sure that
+            //it gets added before the application is closed, destroyed, etc
+            MonitoredLocationsDatabase db = Room.databaseBuilder(this,
+                    MonitoredLocationsDatabase.class, MonitoredLocation.DATABASE_KEY)
+                    .allowMainThreadQueries().build();
+            //TODO: check if there is going to be any discrepancy between database and
+            //TODO: the static temporary list created on the MainActivityThread
+            MainActivity.places.add(monitoredplace);
+            db.monitoredLocationDao().insertAll(monitoredplace);
+            Toast.makeText(this, db.monitoredLocationDao().
+                    getListOfLocations().toString(), Toast.LENGTH_LONG).show();
+        }
         finish();
     }
 }

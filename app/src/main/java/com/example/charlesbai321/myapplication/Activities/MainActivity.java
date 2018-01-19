@@ -2,6 +2,7 @@ package com.example.charlesbai321.myapplication.Activities;
 
 import android.Manifest;
 import android.app.Activity;
+import android.arch.persistence.room.Database;
 import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.content.Intent;
@@ -14,8 +15,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.charlesbai321.myapplication.Data.MonitoredLocationDao;
 import com.example.charlesbai321.myapplication.Data.MonitoredLocationsDatabase;
@@ -31,37 +34,41 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static final String USE_GPS = "use_gps";
     public static final String PLACES_KEY = "places_key";
     public static final String LATITUDE = "latitude";
     public static final String LONGITUDE = "longitude";
-    public static final String USE_GPS = "use_gps";
+    public static final String LOG = "what_is_going_ONNNN";
     boolean useGPS;
     public static List<MonitoredLocation> places;
     TextView places_text;
     RecyclerView rv;
     RecyclerView.LayoutManager rvManager;
     RecyclerView.Adapter dataAdapter;
+    //might as well just have a database here and try to get rid of it if it's taking up
+    //too memory
+    MonitoredLocationsDatabase db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main); //initializes the display
 
-        setupRecyclerView();
         places_text = findViewById(R.id.setofplaces);
-
         //initializes the list of places
-        (new InitializeLocationsTask(this, dataAdapter)).execute("dummy string");
+        (new InitializeLocationsTask(this)).execute("dummy string");
         //allows it to run on main UI thread, which may or may not be a good thing
     }
 
     @Override
     protected void onResume(){
         super.onResume();
-        dataAdapter.notifyDataSetChanged();
+        if(dataAdapter != null) {
+            dataAdapter.notifyDataSetChanged();
+        }
         //places_text.setText(places.toString());
         //whenever the list of places gets deleted (which it shouldn't), recreate it
-        if(places == null) (new InitializeLocationsTask(this, dataAdapter))
+        if(places == null) (new InitializeLocationsTask(this))
                 .execute("dummy string");
 
         if(!hasPermission(this)){
@@ -102,6 +109,15 @@ public class MainActivity extends AppCompatActivity {
     public void clearList(View view){
         places.clear();
         dataAdapter.notifyDataSetChanged();
+        if(db != null){
+            for(MonitoredLocation ml : places) {
+                db.monitoredLocationDao().deleteMonitoredLocationItem(ml);
+            }
+            places.clear();
+            Toast.makeText(this, "Clear Success", Toast.LENGTH_SHORT).show();
+        }
+        else Toast.makeText(this,
+                "Error occured, restart app and try again", Toast.LENGTH_SHORT).show();
     }
 
     public static boolean hasPermission(Context c){
@@ -126,10 +142,9 @@ public class MainActivity extends AppCompatActivity {
     //https://stackoverflow.com/questions/16920942/getting-context-in-asynctask
     //from here, because I need to use context to get the database, I'm obtaining a weak
     //reference to the database which will prevent memory leaks
-    private static class InitializeLocationsTask
+    private class InitializeLocationsTask
             extends AsyncTask<String, Void, List<MonitoredLocation>>{
         private final WeakReference<Activity> weakActivity;
-        RecyclerView.Adapter adapter;
 
         protected List<MonitoredLocation> doInBackground(String... strings) {
             //the constructor is left as a string because I don't know how to deal with
@@ -138,9 +153,11 @@ public class MainActivity extends AppCompatActivity {
             if(a == null || a.isFinishing() || a.isDestroyed()){
                 return null;
             }
-            return Room.databaseBuilder(a,
-                    MonitoredLocationsDatabase.class, "saved_places")
-                    .build().monitoredLocationDao().getListOfLocations();
+
+            db = Room.databaseBuilder(a,
+                    MonitoredLocationsDatabase.class, MonitoredLocation.DATABASE_KEY)
+                    .build();
+            return db.monitoredLocationDao().getListOfLocations();
         }
 
         @Override
@@ -150,12 +167,13 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
             places = db;
-            adapter.notifyDataSetChanged();
+            setupRecyclerView();
+            dataAdapter.notifyDataSetChanged();
+            Toast.makeText(a.getApplication(), places.toString(), Toast.LENGTH_LONG).show();
         }
 
-        public InitializeLocationsTask(Activity a, RecyclerView.Adapter adapter){
+        public InitializeLocationsTask(Activity a){
             this.weakActivity = new WeakReference<>(a);
-            this.adapter = adapter;
         }
     }
 }
