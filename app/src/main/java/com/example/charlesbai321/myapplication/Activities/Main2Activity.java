@@ -1,11 +1,13 @@
 package com.example.charlesbai321.myapplication.Activities;
 
+import android.arch.persistence.room.Room;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 
 import com.example.charlesbai321.myapplication.Data.MonitoredLocation;
+import com.example.charlesbai321.myapplication.Data.MonitoredLocationsDatabase;
 import com.example.charlesbai321.myapplication.R;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.Place;
@@ -83,10 +85,19 @@ public class Main2Activity extends AppCompatActivity implements OnMapReadyCallba
 
 
     //this is called by clicking on the button, initialized it there as not to clutter activity
+
     public void addPlace(View view){
         MonitoredLocation monitoredplace = new MonitoredLocation(thisplace.getName().toString(),
                 thisplace.getLatLng());
+        //we're going to let all this run on the main thread because we want to be sure that
+        //it gets added before the application is closed, destroyed, etc
+        MonitoredLocationsDatabase db = Room.databaseBuilder(this,
+                MonitoredLocationsDatabase.class, MonitoredLocation.DATABASE_KEY)
+                .allowMainThreadQueries().build();
+        //TODO: check if there is going to be any discrepancy between database and
+        //TODO: the static temporary list created on the MainActivityThread
         MainActivity.places.add(monitoredplace);
+        db.monitoredLocationDao().insertAll(monitoredplace);
         finish();
     }
 }

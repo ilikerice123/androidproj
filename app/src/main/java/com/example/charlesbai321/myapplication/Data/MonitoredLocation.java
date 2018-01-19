@@ -1,6 +1,8 @@
 package com.example.charlesbai321.myapplication.Data;
 
+import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -11,24 +13,44 @@ import com.google.android.gms.maps.model.LatLng;
  * Created by charlesbai321 on 17/01/18.
  */
 
-@Entity //<- this marks it as an entity for Room
+@Entity(tableName = MonitoredLocation.DATABASE_KEY) //<- this marks it as an entity for Room
 public class MonitoredLocation implements Parcelable {
+    public static final String DATABASE_KEY = "monitoredlocation_database";
 
     //needs to be unique across different MonitoredLocation objects - name should suffice (?)
-    @PrimaryKey //<- this value is used to differentiate and search items in your store
+    //this value is used to differentiate and search items in your store
+    @PrimaryKey(autoGenerate = true)
+    private int id;
+
+    //I originally had a LatLng object, but then I realized that I'd have to create a converter
+    //so I just decided to separate it since LatLng is just a wrapper around the two doubles
+    //anyway, and just return LatLng when I need it
+    @ColumnInfo(name = "name")
     public String name;
-    public LatLng location;
+    @ColumnInfo(name = "latitude_position")
+    public double latitude;
+    @ColumnInfo(name = "longitude_position")
+    public double longitude;
+    @ColumnInfo(name = "time_spent")
     public int time_spent;
 
+    public MonitoredLocation(String name, double latitude, double longitude, int time_spent){
+
+    }
+
+    @Ignore
     public MonitoredLocation(String name, LatLng location){
         this.name = name;
-        this.location = location;
+        this.latitude = location.latitude;
+        this.longitude = location.longitude;
         time_spent = 0;
     }
 
+    @Ignore
     public MonitoredLocation(String name, LatLng location, int time_spent){
         this.name = name;
-        this.location = location;
+        this.latitude = location.latitude;
+        this.longitude = location.longitude;
         this.time_spent = time_spent;
     }
 
@@ -51,8 +73,8 @@ public class MonitoredLocation implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeStringArray(new String[] {name, Double.toString(location.latitude),
-            Double.toString(location.longitude), Integer.toString(time_spent)});
+        parcel.writeStringArray(new String[] {name, Double.toString(latitude),
+            Double.toString(longitude), Integer.toString(time_spent)});
     }
 
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() {
@@ -68,15 +90,27 @@ public class MonitoredLocation implements Parcelable {
         }
     };
 
-    public MonitoredLocation(Parcel in){
+    private MonitoredLocation(Parcel in){
         String[] data = new String[4];
         in.readStringArray(data);
         this.name = data[0];
         double lat = Double.parseDouble(data[1]);
         double lng = Double.parseDouble(data[2]);
         this.time_spent = Integer.parseInt(data[3]);
-        this.location = new LatLng(lat, lng);
+        this.latitude = lat;
+        this.longitude = lng;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public LatLng getLocation(){
+        return new LatLng(latitude, longitude);
+    }
+
+    public void setId(int id){
+        this.id = id;
+    }
 }
 
