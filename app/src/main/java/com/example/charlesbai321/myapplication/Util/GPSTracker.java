@@ -1,4 +1,4 @@
-package com.example.charlesbai321.myapplication;
+package com.example.charlesbai321.myapplication.Util;
 
 import android.Manifest;
 import android.app.Activity;

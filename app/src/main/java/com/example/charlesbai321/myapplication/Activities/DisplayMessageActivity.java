@@ -1,20 +1,19 @@
-package com.example.charlesbai321.myapplication;
+package com.example.charlesbai321.myapplication.Activities;
 
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.SurfaceTexture;
 import android.location.Location;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.CardView;
 import android.util.Log;
-import android.view.TextureView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.charlesbai321.myapplication.Util.GPSTracker;
+import com.example.charlesbai321.myapplication.R;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
@@ -190,7 +189,4 @@ public class DisplayMessageActivity extends AppCompatActivity {
         result.setText("You are " + df2.format(distance) + " meters away from " + name + "!");
     }
 
-    private void openCamera(){
-
-    }
 }

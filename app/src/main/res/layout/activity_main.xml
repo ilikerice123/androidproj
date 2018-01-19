@@ -4,13 +4,24 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.charlesbai321.myapplication.MainActivity">
+    tools:context="com.example.charlesbai321.myapplication.Activities.MainActivity">
 
     <Button
         android:id="@+id/button"
         android:layout_width="194dp"
         android:layout_height="48dp"
-        android:layout_marginTop="56dp"
+        android:layout_marginTop="8dp"
+        android:onClick="clearList"
+        android:text="Clear List"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button4" />
+
+    <Button
+        android:id="@+id/button4"
+        android:layout_width="194dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="8dp"
         android:onClick="useGPSLocation"
         android:text="Use GPS Location"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -21,63 +32,32 @@
         android:id="@+id/button2"
         android:layout_width="194dp"
         android:layout_height="48dp"
-        android:layout_marginTop="20dp"
-        android:onClick="useInputLocation"
-        android:text="Use Inputted Location"
+        android:layout_marginTop="8dp"
+        android:onClick="addLocation"
+        android:text="Add Location"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textlon" />
-
-    <EditText
-        android:id="@+id/textlon"
-        android:layout_width="224dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="28dp"
-        android:ems="10"
-        android:inputType="numberDecimal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/textView3"
-        app:layout_constraintTop_toBottomOf="@+id/lat" />
+        app:layout_constraintTop_toBottomOf="@+id/recyclerView" />
 
     <TextView
-        android:id="@+id/textView3"
-        android:layout_width="80dp"
-        android:layout_height="30dp"
+        android:id="@+id/setofplaces"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Longitude:"
-        app:layout_constraintBottom_toBottomOf="@+id/textlon"
-        app:layout_constraintEnd_toStartOf="@+id/textlon"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintHorizontal_chainStyle="packed"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/textlon"
-        app:layout_constraintVertical_bias="1.0" />
-
-    <EditText
-        android:id="@+id/lat"
-        android:layout_width="224dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="120dp"
-        android:ems="10"
-        android:inputType="numberDecimal"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/textView2"
+        android:text="Your places:"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/textView2"
-        android:layout_width="80dp"
-        android:layout_height="30dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginTop="8dp"
-        android:text="Latitude:"
-        app:layout_constraintBottom_toBottomOf="@+id/lat"
-        app:layout_constraintEnd_toStartOf="@+id/lat"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintHorizontal_chainStyle="packed"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="0dp"
+        android:layout_height="317dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/lat" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 </android.support.constraint.ConstraintLayout>

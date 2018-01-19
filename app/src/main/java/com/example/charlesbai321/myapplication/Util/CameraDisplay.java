@@ -1,9 +1,11 @@
-package com.example.charlesbai321.myapplication;
+package com.example.charlesbai321.myapplication.Util;
 
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Matrix;
+import android.graphics.RectF;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraDevice;
@@ -14,6 +16,7 @@ import android.os.HandlerThread;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.Size;
+import android.view.Surface;
 import android.view.SurfaceView;
 import android.view.TextureView;
 import android.widget.Toast;
@@ -128,11 +131,50 @@ public class CameraDisplay {
             Toast.makeText(c, "Permission denied!", Toast.LENGTH_SHORT);
         }
 
+        // configureTransform(width, height); camera is locked to portrait rn, so we don't need this
+        //function. However, if we ever decide to include rotations in our app, then we need a
+        //configure transform.
+
         CameraManager cm = (CameraManager) a.getSystemService(Context.CAMERA_SERVICE);
-        try{
-            
-        }
+
     }
+
+        /**
+     * Configures the necessary {@link android.graphics.Matrix} transformation to `mTextureView`.
+     * This method should be called after the camera preview size is determined in
+     * setUpCameraOutputs and also the size of `mTextureView` is fixed.
+     *
+     * @param viewWidth  The width of `mTextureView`
+     * @param viewHeight The height of `mTextureView`
+     */
+        /*
+    private void configureTransform(int viewWidth, int viewHeight) {;
+        if (tv == null || previewSize == null || a == null) {
+            return;
+        }
+        int rotation = a.getWindowManager().getDefaultDisplay().getRotation();
+        Matrix matrix = new Matrix();
+        RectF viewRect = new RectF(0, 0, viewWidth, viewHeight);
+        RectF bufferRect = new RectF(0, 0, previewSize.getHeight(), previewSize.getWidth());
+        float centerX = viewRect.centerX();
+        float centerY = viewRect.centerY();
+        if (Surface.ROTATION_90 == rotation || Surface.ROTATION_270 == rotation) {
+            bufferRect.offset(centerX - bufferRect.centerX(), centerY - bufferRect.centerY());
+            matrix.setRectToRect(viewRect, bufferRect, Matrix.ScaleToFit.FILL);
+            float scale = Math.max(
+                    (float) viewHeight / previewSize.getHeight(),
+                    (float) viewWidth / previewSize.getWidth());
+            matrix.postScale(scale, scale, centerX, centerY);
+            matrix.postRotate(90 * (rotation - 2), centerX, centerY);
+        } else if (Surface.ROTATION_180 == rotation) {
+            matrix.postRotate(180, centerX, centerY);
+        }
+        tv.setTransform(matrix);
+    }
+    */
+
+
+
 
 
 
