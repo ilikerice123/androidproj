@@ -3,6 +3,7 @@ package com.example.charlesbai321.myapplication.Activities;
 import android.arch.persistence.room.Room;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -98,8 +99,11 @@ public class Main2Activity extends AppCompatActivity implements OnMapReadyCallba
                     .allowMainThreadQueries().build();
             //TODO: check if there is going to be any discrepancy between database and
             //TODO: the static temporary list created on the MainActivityThread
-            MainActivity.places.add(monitoredplace);
             db.monitoredLocationDao().insertAll(monitoredplace);
+            //^after it is inserted to the database, I have to load the list of places again
+            //and this is the only place where I change my list, so the list is only updated
+            //through the database and not by any other means
+            MainActivity.places = db.monitoredLocationDao().getListOfLocations();
             Toast.makeText(this, db.monitoredLocationDao().
                     getListOfLocations().toString(), Toast.LENGTH_LONG).show();
         }

@@ -1,6 +1,7 @@
 package com.example.charlesbai321.myapplication.Util;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -17,6 +18,8 @@ public class GPSService extends Service {
     public IBinder onBind(Intent intent) {
         return null;
     }
+
+
 
 
 }

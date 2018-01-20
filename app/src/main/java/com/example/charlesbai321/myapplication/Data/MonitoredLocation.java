@@ -75,7 +75,7 @@ public class MonitoredLocation implements Parcelable {
 
     @Override
     public String toString(){
-        return name;
+        return name + id;
     }
 
 

@@ -22,7 +22,7 @@ public interface MonitoredLocationDao {
     List<MonitoredLocation> getListOfLocations();
 
     @Delete
-    void deleteMonitoredLocationItem(MonitoredLocation... place);
+    void deleteMonitoredLocations(MonitoredLocation... place);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAll(MonitoredLocation... place);

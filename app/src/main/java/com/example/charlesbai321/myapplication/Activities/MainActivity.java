@@ -107,14 +107,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void clearList(View view){
-        places.clear();
-        dataAdapter.notifyDataSetChanged();
         if(db != null){
             for(MonitoredLocation ml : places) {
-                db.monitoredLocationDao().deleteMonitoredLocationItem(ml);
+                db.monitoredLocationDao().deleteMonitoredLocations(ml);
             }
             places.clear();
             Toast.makeText(this, "Clear Success", Toast.LENGTH_SHORT).show();
+            dataAdapter.notifyDataSetChanged();
         }
         else Toast.makeText(this,
                 "Error occured, restart app and try again", Toast.LENGTH_SHORT).show();
@@ -156,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
 
             db = Room.databaseBuilder(a,
                     MonitoredLocationsDatabase.class, MonitoredLocation.DATABASE_KEY)
-                    .build();
+                    .allowMainThreadQueries().build();
             return db.monitoredLocationDao().getListOfLocations();
         }
 
