@@ -3,13 +3,11 @@ package com.example.charlesbai321.myapplication.Activities;
 import android.arch.persistence.room.Room;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.charlesbai321.myapplication.Data.MonitoredLocation;
-import com.example.charlesbai321.myapplication.Data.MonitoredLocationsDatabase;
 import com.example.charlesbai321.myapplication.R;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.places.Place;
@@ -92,20 +90,21 @@ public class Main2Activity extends AppCompatActivity implements OnMapReadyCallba
         if(thisplace != null) {
             MonitoredLocation monitoredplace = new MonitoredLocation(thisplace.getName().toString(),
                     thisplace.getName().toString(), thisplace.getLatLng());
-            //we're going to let all this run on the main thread because we want to be sure that
-            //it gets added before the application is closed, destroyed, etc
-            MonitoredLocationsDatabase db = Room.databaseBuilder(this,
-                    MonitoredLocationsDatabase.class, MonitoredLocation.DATABASE_KEY)
-                    .allowMainThreadQueries().build();
-            //TODO: check if there is going to be any discrepancy between database and
-            //TODO: the static temporary list created on the MainActivityThread
-            db.monitoredLocationDao().insertAll(monitoredplace);
-            //^after it is inserted to the database, I have to load the list of places again
-            //and this is the only place where I change my list, so the list is only updated
-            //through the database and not by any other means
-            MainActivity.places = db.monitoredLocationDao().getListOfLocations();
-            Toast.makeText(this, db.monitoredLocationDao().
-                    getListOfLocations().toString(), Toast.LENGTH_LONG).show();
+            if(MainActivity.db != null) {
+                MainActivity.db.monitoredLocationDao().insertAll(monitoredplace);
+                //^after it is inserted to the database, I have to load the list of places again
+                //and this is the only place where I change my list, so the list is only updated
+                //through the database and not by any other means
+
+                //refresh list of places
+                MainActivity.places = MainActivity.db.monitoredLocationDao().getListOfLocations();
+                Toast.makeText(this, MainActivity.db.monitoredLocationDao().
+                        getListOfLocations().toString(), Toast.LENGTH_LONG).show();
+            }
+            else {
+                Toast.makeText(this, "Error adding place, try again later",
+                        Toast.LENGTH_SHORT).show();
+            }
         }
         finish();
     }

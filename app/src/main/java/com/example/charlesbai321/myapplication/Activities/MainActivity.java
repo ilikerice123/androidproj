@@ -2,12 +2,15 @@ package com.example.charlesbai321.myapplication.Activities;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.arch.persistence.room.Database;
 import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -22,6 +25,7 @@ import android.widget.Toast;
 
 import com.example.charlesbai321.myapplication.Data.MonitoredLocationDao;
 import com.example.charlesbai321.myapplication.Data.MonitoredLocationsDatabase;
+import com.example.charlesbai321.myapplication.Util.AlarmReciever;
 import com.example.charlesbai321.myapplication.Util.GPSService;
 import com.example.charlesbai321.myapplication.Util.GPSTracker;
 import com.example.charlesbai321.myapplication.Data.MonitoredLocation;
@@ -39,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String LATITUDE = "latitude";
     public static final String LONGITUDE = "longitude";
     public static final String LOG = "what_is_going_ONNNN";
-    boolean useGPS;
+    public static final String GPS_TOGGLE = "are_we_using_gps???";
     public static List<MonitoredLocation> places;
     TextView places_text;
     RecyclerView rv;
@@ -47,8 +51,13 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView.Adapter dataAdapter;
     //might as well just have a database here and try to get rid of it if it's taking up
     //too memory
-    MonitoredLocationsDatabase db;
+    static MonitoredLocationsDatabase db;
+    PendingIntent locationLogIntent;
 
+    /**
+     * creates a list from the database, initializes view, that's about all this does..
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +69,11 @@ public class MainActivity extends AppCompatActivity {
         //allows it to run on main UI thread, which may or may not be a good thing
     }
 
+    /**
+     * refresh recyclerview if recyclerview isn't null
+     * if list of places has been deleted, run task to fetch it again
+     * check for gps permissions
+     */
     @Override
     protected void onResume(){
         super.onResume();
@@ -78,6 +92,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * callback for request permissions, this will check if location access has been
+     * granted. If not, kill app (or at least this activity, which should lead to app kill
+     * @param requestCode
+     * @param permissions
+     * @param grantResults
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[],
                                            int[] grantResults) {
@@ -94,18 +115,39 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * poorly named method, actually configures alarm manager
+     * @param view
+     */
+    public void startGPSService(View view){
+        AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        Intent i = new Intent(this, AlarmReciever.class);
+        locationLogIntent = PendingIntent.getBroadcast(this, 0,
+                i, PendingIntent.FLAG_CANCEL_CURRENT);
+        am.set(AlarmManager.ELAPSED_REALTIME,
+                AlarmManager.INTERVAL_FIFTEEN_MINUTES +
+                        SystemClock.elapsedRealtime(), AlarmManager.INTERVAL_FIFTEEN_MINUTES,
+                );
+    }
+
+    public void stopGPSService(View view){
+
+    }
+
+    /**
+     * method that executes when user presses add location button. launches new activity
+     * @param view
+     */
     public void addLocation(View view){
         Intent i = new Intent(this, Main2Activity.class);
         startActivity(i);
     }
 
-    public void useGPSLocation(View view){
-        Intent i = new Intent(this, DisplayMessageActivity.class);
-        useGPS = true;
-        i.putExtra(USE_GPS, useGPS);
-        startActivity(i);
-    }
-
+    /**
+     * clear the list of saved locations - deletes them not only from temporary list
+     * created for recycler view, but also from the database
+     * @param view
+     */
     public void clearList(View view){
         if(db != null){
             for(MonitoredLocation ml : places) {
@@ -119,11 +161,19 @@ public class MainActivity extends AppCompatActivity {
                 "Error occured, restart app and try again", Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * checks if we have GPS locations
+     * @param c
+     * @return
+     */
     public static boolean hasPermission(Context c){
         return ContextCompat.checkSelfPermission(c,
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
+    /**
+     * a few lines to initialize the recyclerView, the layout manager, and the data adapter
+     */
     private void setupRecyclerView(){
         rv = findViewById(R.id.recyclerView); //obtains reference to rView
         rvManager = new LinearLayoutManager(this); //layout manager
