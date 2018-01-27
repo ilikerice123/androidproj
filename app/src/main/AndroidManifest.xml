@@ -60,12 +60,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.charlesbai321.myapplication.Activities.MainActivity" />
         </activity>
-        <!--Originally was going to use a reciever in conjunction with a GPS service to
-        make calls to getLocation(), but decided to use alarm manager instead, so this isn't needed-->
-        <!-- <receiver android:name=".UAlarmRecieverever" android:enabled="true" android:exported="false">
+        <!-- I don't need this anymore
+        <receiver android:name=".Util.AlarmReciever">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
-                <action android:name="restartService"/>
+                <action android:name="com.example.broadcast.WHATDOIPUTHERE"/>
             </intent-filter>
         </receiver> -->
         <service android:name=".Util.GPSService" android:stopWithTask="false"/>

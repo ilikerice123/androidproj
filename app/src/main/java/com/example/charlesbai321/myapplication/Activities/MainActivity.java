@@ -1,15 +1,22 @@
 package com.example.charlesbai321.myapplication.Activities;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.PendingIntent;
 import android.arch.persistence.room.Database;
 import android.arch.persistence.room.Room;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -19,7 +26,12 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String LATITUDE = "latitude";
     public static final String LONGITUDE = "longitude";
     public static final String LOG = "what_is_going_ONNNN";
-    public static final String GPS_TOGGLE = "are_we_using_gps???";
+    public static final String LOCSTARTSTOP = "are_we_using_gps???";
     public static List<MonitoredLocation> places;
     TextView places_text;
     RecyclerView rv;
@@ -52,10 +64,11 @@ public class MainActivity extends AppCompatActivity {
     //might as well just have a database here and try to get rid of it if it's taking up
     //too memory
     static MonitoredLocationsDatabase db;
-    PendingIntent locationLogIntent;
+
 
     /**
-     * creates a list from the database, initializes view, that's about all this does..
+     * creates a list from the database, initializes view, alarm manager, and intent for the
+     * alarm manager to send
      * @param savedInstanceState
      */
     @Override
@@ -63,10 +76,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main); //initializes the display
 
+        if (Build.BRAND.equalsIgnoreCase("xiaomi")) {
+            DialogFragment popUp = new GotoSettingsPopup();
+            popUp.show(getFragmentManager(), "xiaomi_popup");
+        }
+
         places_text = findViewById(R.id.setofplaces);
-        //initializes the list of places
+        //initializes the list of places from database
         (new InitializeLocationsTask(this)).execute("dummy string");
-        //allows it to run on main UI thread, which may or may not be a good thing
+
     }
 
     /**
@@ -116,22 +134,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * poorly named method, actually configures alarm manager
      * @param view
      */
     public void startGPSService(View view){
-        AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        Intent i = new Intent(this, AlarmReciever.class);
-        locationLogIntent = PendingIntent.getBroadcast(this, 0,
-                i, PendingIntent.FLAG_CANCEL_CURRENT);
-        am.set(AlarmManager.ELAPSED_REALTIME,
-                AlarmManager.INTERVAL_FIFTEEN_MINUTES +
-                        SystemClock.elapsedRealtime(), AlarmManager.INTERVAL_FIFTEEN_MINUTES,
-                );
+        Intent i = new Intent(this, GPSService.class);
+        startService(i);
     }
 
     public void stopGPSService(View view){
-
+        Intent i = new Intent(this, GPSService.class);
+        stopService(i);
     }
 
     /**
@@ -223,6 +235,39 @@ public class MainActivity extends AppCompatActivity {
 
         public InitializeLocationsTask(Activity a){
             this.weakActivity = new WeakReference<>(a);
+        }
+    }
+
+    /**
+     * creates an alertdialog object that can be placed somewhere.
+     * Code mostly from android studio
+     */
+    @SuppressLint("ValidFragment")
+    public class GotoSettingsPopup extends DialogFragment {
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            String message =
+                    "It seems you are on a HuaWei or Xiaomi phone. Please add it to " +
+                    "the list of allowed apps in the next screen in order for this app " +
+                    "to work properly.";
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            builder.setMessage(message)
+                    .setPositiveButton("Next", new DialogInterface.OnClickListener() {
+                        //https://stackoverflow.com/questions/40660216/ontaskremoved-not-getting-called-in-huawei-and-xiomi-devices
+                        public void onClick(DialogInterface dialog, int id) {
+                            Intent intent = new Intent();
+                            intent.setComponent(new ComponentName("com.miui.securitycenter",
+                                    "com.miui.permcenter.autostart.AutoStartManagementActivity"));
+                            startActivity(intent);
+                        }
+                    })
+                    .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // User cancelled the dialog
+                        }
+                    });
+            return builder.create();
         }
     }
 }
