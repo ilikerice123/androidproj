@@ -31,10 +31,15 @@ import com.google.android.gms.location.LocationSettingsRequest;
  * Created by charlesbai321 on 18/01/18.
  */
 
+/**
+ * this class is completely useless now.
+ *
+ * Originally, this was how my app was going to request locations every 15 or so minutes,
+ * but because services don't run when the CPU is a asleep and obtaining a constant CPU
+ * wakelock is not a valid solution, this class is now deprecated.
+ */
 public class GPSService extends Service {
     public static final int USE_GPS = 3;
-
-    public static final int TEN_MINUTES = 10*60*1000;
 
     private MonitoredLocationsDatabase db;
     private LocationRequest lr;
@@ -80,6 +85,7 @@ public class GPSService extends Service {
     }
 
     private void parseLocation(Location l){
+        Log.d(MainActivity.LOG, l.toString());
         Toast.makeText(this, l.toString(), Toast.LENGTH_SHORT).show();
         Toast.makeText(this,
                 db.monitoredLocationDao().getListOfLocations().toString(),

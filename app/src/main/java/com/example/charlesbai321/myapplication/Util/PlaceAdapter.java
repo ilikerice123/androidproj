@@ -36,11 +36,13 @@ public class PlaceAdapter extends RecyclerView.Adapter {
     public static class placesHolder extends RecyclerView.ViewHolder {
         protected TextView place_name;
         protected ProgressBar progressbar;
+        protected TextView time_spent;
 
         public placesHolder(View itemView) {
             super(itemView);
             place_name = itemView.findViewById(R.id.placeName);
             progressbar = itemView.findViewById(R.id.placeProgress);
+            time_spent = itemView.findViewById(R.id.time_spent);
         }
 
     }
@@ -51,6 +53,7 @@ public class PlaceAdapter extends RecyclerView.Adapter {
         //me an error :/
         MonitoredLocation place = MainActivity.places.get(position);
         holder.place_name.setText(place.name);
+        holder.time_spent.setText(Integer.toString(place.time_spent));
     }
 
     @Override

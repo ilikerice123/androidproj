@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "3ae213d4a4dab645acf152ef9d094219",
+    "identityHash": "70c8237f54d5f7dd7bbd50d9292238cb",
     "entities": [
       {
         "tableName": "monitoredlocation_database",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `nick_name` TEXT, `latitude_position` REAL NOT NULL, `longitude_position` REAL NOT NULL, `time_spent` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `nick_name` TEXT, `latitude_position` REAL NOT NULL, `longitude_position` REAL NOT NULL, `time_spent` INTEGER NOT NULL, `time_last_updated` INTEGER NOT NULL, `last_logged` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "id",
@@ -43,6 +43,18 @@
             "columnName": "time_spent",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "timeLastUpdated",
+            "columnName": "time_last_updated",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastLogged",
+            "columnName": "last_logged",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -57,7 +69,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"3ae213d4a4dab645acf152ef9d094219\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"70c8237f54d5f7dd7bbd50d9292238cb\")"
     ]
   }
 }

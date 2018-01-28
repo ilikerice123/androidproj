@@ -43,6 +43,7 @@ import com.example.charlesbai321.myapplication.Util.GPSTracker;
 import com.example.charlesbai321.myapplication.Data.MonitoredLocation;
 import com.example.charlesbai321.myapplication.Util.PlaceAdapter;
 import com.example.charlesbai321.myapplication.R;
+import com.example.charlesbai321.myapplication.Util.StartGPSService;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -75,11 +76,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main); //initializes the display
-
-        if (Build.BRAND.equalsIgnoreCase("xiaomi")) {
-            DialogFragment popUp = new GotoSettingsPopup();
-            popUp.show(getFragmentManager(), "xiaomi_popup");
-        }
 
         places_text = findViewById(R.id.setofplaces);
         //initializes the list of places from database
@@ -134,16 +130,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * starts the service that sets the alarm.
      * @param view
      */
     public void startGPSService(View view){
-        Intent i = new Intent(this, GPSService.class);
+        Intent i = new Intent(this, StartGPSService.class);
+        i.putExtra(MainActivity.USE_GPS, true);
         startService(i);
     }
 
+    /**
+     * start the same service as StartGPSService, but this time passing false in the
+     * intent to signify we need to cancel the alarm
+     * @param view
+     */
     public void stopGPSService(View view){
-        Intent i = new Intent(this, GPSService.class);
-        stopService(i);
+        Intent i = new Intent(this, StartGPSService.class);
+        i.putExtra(MainActivity.USE_GPS, false);
+        startService(i);
     }
 
     /**
@@ -238,6 +242,19 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+    //NOT NEEDED --------------------------------------------------------------------
+    //I originally needed this because I had a START_STICKY service that would continuously
+    //run when my app closed, but on xiaomi and huawei phones, there needed to be an extra step
+    //in order to allow services to be restarted, which is what this dialog box prompts the user
+    //to do when they click next. However, now I'm using alarm manager in conjunction with
+    //Intent services in order to fire the necessary requests, so I don't need this dialog box
+    //anymore
+    //
+    //
+    //Called on oncreate by:
+//            DialogFragment popUp = new GotoSettingsPopup();
+//            popUp.show(getFragmentManager(), "xiaomi_popup");
     /**
      * creates an alertdialog object that can be placed somewhere.
      * Code mostly from android studio

@@ -13,7 +13,10 @@ import com.example.charlesbai321.myapplication.Activities.MainActivity;
  */
 
 /**
- * not needed - unregistered in manifest file
+ * not needed - unregistered in manifest file.
+ * This was originally used as a way to restart the service when it gets shut down,
+ * but we don't need that anymore because we are not using a persistence service to
+ * request GPS
  */
 //TODO: add to manifest file
 public class AlarmReciever extends BroadcastReceiver{

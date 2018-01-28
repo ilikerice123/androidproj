@@ -34,7 +34,16 @@ public class MonitoredLocation implements Parcelable {
     @ColumnInfo(name = "longitude_position")
     public double longitude;
     @ColumnInfo(name = "time_spent")
+    //these are initialized to 0 by default, so it's fine
     public int time_spent;
+    /**
+     * this is the same throughout every object in the database -
+     * it just marks when the location has last been updated.
+     */
+    @ColumnInfo(name = "time_last_updated")
+    public long timeLastUpdated;
+    @ColumnInfo(name = "last_logged")
+    public boolean lastLogged;
 
     public MonitoredLocation(){
     }
@@ -75,7 +84,8 @@ public class MonitoredLocation implements Parcelable {
 
     @Override
     public String toString(){
-        return name + id;
+        return "[" + id + ": " + name + ", timelastUpdated: " + timeLastUpdated +
+                ", time_spent: " + time_spent + ", lastLogged: " + lastLogged + "]";
     }
 
 
