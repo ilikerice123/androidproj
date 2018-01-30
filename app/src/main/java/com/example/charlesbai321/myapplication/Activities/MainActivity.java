@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
     TextView places_text;
     RecyclerView rv;
     RecyclerView.LayoutManager rvManager;
-    RecyclerView.Adapter dataAdapter;
+    PlaceAdapter dataAdapter;
     //might as well just have a database here and try to get rid of it if it's taking up
     //too memory
     static MonitoredLocationsDatabase db;
@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume(){
         super.onResume();
         if(dataAdapter != null) {
-            dataAdapter.notifyDataSetChanged();
+            dataAdapter.refreshList();
         }
         //places_text.setText(places.toString());
         //whenever the list of places gets deleted (which it shouldn't), recreate it
@@ -145,6 +145,13 @@ public class MainActivity extends AppCompatActivity {
      * @param view
      */
     public void stopGPSService(View view){
+        //we reset the time last updated to 0. this way, when the user starts it up again,
+        //it doesn't assign all the time that the user wasn't tracking to the first closest
+        //location that matches
+        for(MonitoredLocation ml : places){
+            ml.timeLastUpdated = 0;
+            db.monitoredLocationDao().updatePlace(ml);
+        }
         Intent i = new Intent(this, StartGPSService.class);
         i.putExtra(MainActivity.USE_GPS, false);
         startService(i);
@@ -171,14 +178,14 @@ public class MainActivity extends AppCompatActivity {
             }
             places.clear();
             Toast.makeText(this, "Clear Success", Toast.LENGTH_SHORT).show();
-            dataAdapter.notifyDataSetChanged();
+            dataAdapter.refreshList();
         }
         else Toast.makeText(this,
                 "Error occured, restart app and try again", Toast.LENGTH_SHORT).show();
     }
 
     /**
-     * checks if we have GPS locations
+     * checks if we have permission to access gps
      * @param c
      * @return
      */
@@ -201,9 +208,7 @@ public class MainActivity extends AppCompatActivity {
     //AsyncTask
     //this runs on another thread to create the lists of monitored locations from android's
     //Room
-
     //every time this finishes executing, it notifies the adapter of that
-
     //https://stackoverflow.com/questions/16920942/getting-context-in-asynctask
     //from here, because I need to use context to get the database, I'm obtaining a weak
     //reference to the database which will prevent memory leaks
@@ -233,8 +238,7 @@ public class MainActivity extends AppCompatActivity {
             }
             places = db;
             setupRecyclerView();
-            dataAdapter.notifyDataSetChanged();
-            Toast.makeText(a.getApplication(), places.toString(), Toast.LENGTH_LONG).show();
+            dataAdapter.refreshList();
         }
 
         public InitializeLocationsTask(Activity a){

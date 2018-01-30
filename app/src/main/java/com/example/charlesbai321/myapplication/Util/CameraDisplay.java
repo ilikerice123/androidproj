@@ -35,6 +35,8 @@ import java.util.concurrent.Semaphore;
     //of which is personalized to the point where it won't run on other people's devices???
     //If I wanted to copy paste code without knowing how it worked, I would do it from
     // Google's official github examples. This is hardly a "tutorial"!!!
+
+    //incomplete
 public class CameraDisplay {
 
     /**

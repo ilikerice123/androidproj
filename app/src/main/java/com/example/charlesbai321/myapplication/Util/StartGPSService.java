@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.charlesbai321.myapplication.Activities.MainActivity;
 
@@ -38,12 +39,14 @@ public class StartGPSService extends IntentService {
                 i, PendingIntent.FLAG_UPDATE_CURRENT);
         if(start) {
             Log.d(MainActivity.LOG, "started logging service");
+            Toast.makeText(this, "Started Logging!", Toast.LENGTH_SHORT).show();
             am.setInexactRepeating(AlarmManager.ELAPSED_REALTIME,
                     SystemClock.elapsedRealtime() + FIVE_MINUTES, FIVE_MINUTES, pi);
         }
         else {
             if(am != null){
                 Log.d(MainActivity.LOG, "removing logging service");
+                Toast.makeText(this, "Stopped Logging!", Toast.LENGTH_SHORT).show();
                 am.cancel(pi);
             }
         }

@@ -58,20 +58,27 @@ public class ParseLocationService extends IntentService {
         }
     }
 
+    //this runs in O(n^2) time, but idk if I can make this any better
     private void handleLocation(Location l){
         List<MonitoredLocation> places = db.monitoredLocationDao().getListOfLocations();
 
         double shortestDistance = Double.MAX_VALUE;
         MonitoredLocation closestLocation = null;
+
+        //by the end of this for loop, closest location will hold the monitoredlocation that
+        //is closest to the current location, or null if no monitoredlocations are within
+        // 75 meters of current location
         for(MonitoredLocation ml : places){
             //create location object for monitoredlocation
             Location placeLocation = new Location("");
             placeLocation.setLatitude(ml.latitude);
             placeLocation.setLongitude(ml.longitude);
 
+            //checks distance from current location to the monitoredlocation
             double place_distance = placeLocation.distanceTo(l);
 
-            if(place_distance < 75) { //50 meters is quite a bit lol
+            //if it's less than 75 meters, then remember it as the shortest distance
+            if(place_distance < 75) { //75 meters is quite a bit lol
                 if(placeLocation.distanceTo(l) < shortestDistance){
                     closestLocation = ml;
                     shortestDistance = place_distance;
@@ -86,17 +93,20 @@ public class ParseLocationService extends IntentService {
         if(closestLocation != null && closestLocation.timeLastUpdated != 0 &&
                 (sysTime > closestLocation.timeLastUpdated)){
             //if this was the last logged, then we're going to assume the user didn't move
-            if(closestLocation.lastLogged) closestLocation.time_spent += sysTime/1000;
+            if(closestLocation.lastLogged) closestLocation.time_spent +=
+                    (sysTime - closestLocation.timeLastUpdated)/(1000*60);
             //arbituary constant which would be the time the user took to get to his current
             //location
-            else closestLocation.time_spent += sysTime/(2*1000);
+            else closestLocation.time_spent +=
+                    (sysTime - closestLocation.timeLastUpdated)/(2*1000*60);
         }
 
         for(MonitoredLocation ml : places){
             //reset logged status
             ml.lastLogged = false;
 
-            ml.timeLastUpdated = SystemClock.elapsedRealtime()/1000 /*seconds*/;
+            //seconds since last time updated
+            ml.timeLastUpdated = SystemClock.elapsedRealtime() /*milliseconds*/;
             db.monitoredLocationDao().updatePlace(ml);
         }
         if(closestLocation != null) {

@@ -1,5 +1,6 @@
 package com.example.charlesbai321.myapplication.Util;
 
+import android.app.IntentService;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -18,6 +19,7 @@ import com.example.charlesbai321.myapplication.R;
 
 public class PlaceAdapter extends RecyclerView.Adapter {
 
+    private int maximum = 0;
     //might need more stuff later who knows
     public PlaceAdapter(){
     }
@@ -53,11 +55,35 @@ public class PlaceAdapter extends RecyclerView.Adapter {
         //me an error :/
         MonitoredLocation place = MainActivity.places.get(position);
         holder.place_name.setText(place.name);
-        holder.time_spent.setText(Integer.toString(place.time_spent));
+        holder.time_spent.setText(Integer.toString(place.time_spent) + "m");
+        holder.progressbar.setProgress(place.time_spent * 100 / maximum);
     }
 
     @Override
     public int getItemCount() {
         return MainActivity.places.size();
+    }
+
+
+    //refreshes the list, setting a new max progress bar value
+    public void refreshList(){
+        if(MainActivity.places != null){
+            //set to 1 so when I divide by max, I don't get errors
+            int max = 1;
+            for(MonitoredLocation ml : MainActivity.places){
+                if(ml.time_spent > max) max = ml.time_spent;
+            }
+            maximum = max;
+        }
+        else maximum = Integer.MAX_VALUE; //set it to the maximum value, so that all of the
+                                          //progress bars should display 0
+        super.notifyDataSetChanged();
+    }
+
+    /**
+     * hey I can practice implementing different sorting algorithms here :D
+     */
+    public void sortList(){
+
     }
 }
