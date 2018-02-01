@@ -10,7 +10,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="com.android.alarm.permission.SET_ALARM"/>
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
 
     <uses-feature
         android:name="android.hardware.camera"
@@ -55,20 +55,35 @@
             android:name=".Activities.Main2Activity"
             android:label="@string/title_activity_main2"
             android:parentActivityName=".Activities.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar">
+            android:theme="@style/AppTheme.NoActionBar"
+            android:screenOrientation="portrait">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.charlesbai321.myapplication.Activities.MainActivity" />
         </activity>
-        <!-- I don't need this anymore
+        <!--
+        I don't need this anymore
         <receiver android:name=".Util.AlarmReciever">
             <intent-filter>
                 <action android:name="com.example.broadcast.WHATDOIPUTHERE"/>
             </intent-filter>
-        </receiver> -->
-        <service android:name=".Util.GPSService" android:stopWithTask="false"/>
-        <service android:name=".Util.ParseLocationService"/>
-        <service android:name=".Util.StartGPSService"/>
+        </receiver>
+        -->
+        <service
+            android:name=".Util.GPSService"
+            android:stopWithTask="false" />
+        <service android:name=".Util.ParseLocationService" />
+        <service android:name=".Util.StartGPSService" />
+
+        <activity
+            android:name=".Activities.SinglePlaceActivity"
+            android:screenOrientation="portrait"
+            android:parentActivityName=".Activities.MainActivity">
+        </activity>
+        <meta-data
+            android:name="android.support.PARENT_ACTIVITY"
+            android:value=".Activities.SinglePlaceActivity">
+        </meta-data>
     </application>
 
 </manifest>

@@ -1,6 +1,8 @@
 package com.example.charlesbai321.myapplication.Util;
 
 import android.app.IntentService;
+import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -10,6 +12,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.example.charlesbai321.myapplication.Activities.MainActivity;
+import com.example.charlesbai321.myapplication.Activities.SinglePlaceActivity;
 import com.example.charlesbai321.myapplication.Data.MonitoredLocation;
 import com.example.charlesbai321.myapplication.R;
 
@@ -19,9 +22,14 @@ import com.example.charlesbai321.myapplication.R;
 
 public class PlaceAdapter extends RecyclerView.Adapter {
 
+    //used as a reference for how to display progress
     private int maximum = 0;
+    //used to create intents to launch other activities within this adapter
+    private Context c;
+
     //might need more stuff later who knows
-    public PlaceAdapter(){
+    public PlaceAdapter(Context c){
+        this.c = c;
     }
 
     //initializes view of a single item in recycler view and returns it as a ViewHolder
@@ -29,7 +37,6 @@ public class PlaceAdapter extends RecyclerView.Adapter {
     public placesHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         CardView cv = (CardView) LayoutInflater.from(parent.getContext()).inflate(
                 R.layout.placeinfo, parent, false);
-
         return new placesHolder(cv);
     }
 
@@ -53,9 +60,19 @@ public class PlaceAdapter extends RecyclerView.Adapter {
         placesHolder holder = (placesHolder) h; //this cast shouldn't be necessary
         //but for some reason although placesHolder extended viewholder, it was giving
         //me an error :/
+        final int clickedposition = position;
+
+        h.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent i = new Intent(c, SinglePlaceActivity.class);
+                i.putExtra(MainActivity.POSITION_KEY, clickedposition);
+                c.startActivity(i);
+            }
+        });
         MonitoredLocation place = MainActivity.places.get(position);
         holder.place_name.setText(place.name);
-        holder.time_spent.setText(Integer.toString(place.time_spent) + "m");
+        holder.time_spent.setText(place.time_spent/60 + "h " + place.time_spent%60 + "m");
         holder.progressbar.setProgress(place.time_spent * 100 / maximum);
     }
 
@@ -85,5 +102,6 @@ public class PlaceAdapter extends RecyclerView.Adapter {
      */
     public void sortList(){
 
+        super.notifyDataSetChanged();
     }
 }

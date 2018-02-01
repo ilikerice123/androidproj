@@ -52,9 +52,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     public static final String USE_GPS = "use_gps";
-    public static final String PLACES_KEY = "places_key";
-    public static final String LATITUDE = "latitude";
-    public static final String LONGITUDE = "longitude";
+    public static final String POSITION_KEY = "position_key";
     public static final String LOG = "what_is_going_ONNNN";
     public static final String LOCSTARTSTOP = "are_we_using_gps???";
     public static List<MonitoredLocation> places;
@@ -201,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
         rv = findViewById(R.id.recyclerView); //obtains reference to rView
         rvManager = new LinearLayoutManager(this); //layout manager
         rv.setLayoutManager(rvManager);
-        dataAdapter = new PlaceAdapter(); //data adapter
+        dataAdapter = new PlaceAdapter(this); //data adapter
         rv.setAdapter(dataAdapter);
     }
 

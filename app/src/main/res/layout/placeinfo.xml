@@ -12,7 +12,7 @@
     card_view:cardCornerRadius="4dp"
     card_view:cardElevation="2dp"
     card_view:cardUseCompatPadding="true"
-    card_view:clickable="false">
+    card_view:clickable="true">
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"

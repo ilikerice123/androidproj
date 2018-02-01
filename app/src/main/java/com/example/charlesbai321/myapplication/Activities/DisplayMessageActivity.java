@@ -111,8 +111,6 @@ public class DisplayMessageActivity extends AppCompatActivity {
         }
         else{
             //statically set lat and lon once and display it.
-            lat = i.getExtras().getDouble(MainActivity.LATITUDE);
-            lon = i.getExtras().getDouble(MainActivity.LONGITUDE);
             setLocationTextView();
         }
     }
