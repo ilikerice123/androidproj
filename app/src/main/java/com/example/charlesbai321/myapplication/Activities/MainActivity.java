@@ -84,6 +84,7 @@ public class MainActivity extends AppCompatActivity {
         places_text = findViewById(R.id.setofplaces);
         //initializes the list of places from database
         (new InitializeLocationsTask(this)).execute("dummy string");
+        categories = new ArrayList<>();
     }
 
     @Override
@@ -147,8 +148,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
         //whenever the list of places gets deleted (which it shouldn't), recreate it
-        if(places == null) (new InitializeLocationsTask(this))
-                .execute("dummy string");
+        if(places == null) {
+            (new InitializeLocationsTask(this)).execute("dummy string");
+        }
+        else{
+            for(MonitoredLocation ml : places){
+                if(!categories.contains(ml.category)) categories.add(ml.category);
+            }
+        }
 
         //request permissions
         if(!hasPermission(this)){

@@ -33,6 +33,8 @@ public class SinglePlaceActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_single_place);
 
+        Toast.makeText(this, MainActivity.categories.toString(), Toast.LENGTH_SHORT).show();
+
         //extract the position of the recycler view that was clicked
         position = getIntent().getExtras().getInt(MainActivity.POSITION_KEY);
         singlePlaceName = findViewById(R.id.singleplaceName);
@@ -56,7 +58,7 @@ public class SinglePlaceActivity extends AppCompatActivity {
                 [Integer.parseInt(startTime.substring(4, 6))-1];
         int day = Integer.parseInt(startTime.substring(6,8));
 
-        singlePlaceDesc.setText("Starting from " + year + " " + month + " " + day + ", you have spent" +
+        singlePlaceDesc.setText("Starting from " + year + " " + month + " " + day + ", you have spent " +
                         singlePlace.time_spent / 60 + " hours and " + singlePlace.time_spent % 60 +
                         " minutes at " + singlePlace.name);
 
