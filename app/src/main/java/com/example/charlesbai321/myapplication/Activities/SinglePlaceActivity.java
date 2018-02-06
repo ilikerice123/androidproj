@@ -59,8 +59,8 @@ public class SinglePlaceActivity extends AppCompatActivity {
         int day = Integer.parseInt(startTime.substring(6,8));
 
         singlePlaceDesc.setText("Starting from " + year + " " + month + " " + day + ", you have spent " +
-                        singlePlace.time_spent / 60 + " hours and " + singlePlace.time_spent % 60 +
-                        " minutes at " + singlePlace.name);
+                        singlePlace.time_spent / 60 + " hour(s) and " + singlePlace.time_spent % 60 +
+                        " minute(s) at " + singlePlace.name);
 
         //get reference to spinner (why is it even called a spinner?)
         categorySpinner = findViewById(R.id.spinner);

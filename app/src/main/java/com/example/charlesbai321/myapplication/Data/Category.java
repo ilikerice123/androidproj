@@ -35,4 +35,9 @@ public class Category implements Displayable {
     public int hashCode(){
         return this.s.hashCode();
     }
+
+    @Override
+    public String toString(){
+        return "{" + s + ", " + time_spent + "}";
+    }
 }

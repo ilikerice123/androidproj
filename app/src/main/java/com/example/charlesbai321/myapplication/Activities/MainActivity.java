@@ -106,8 +106,10 @@ public class MainActivity extends AppCompatActivity {
         if(dataAdapter == null) return true;
         switch(item.getItemId()){
             case R.id.view_category: {
+                refreshCategories();
                 viewPlace = false;
                 dataAdapter.displayCategory();
+                Toast.makeText(this, categories.toString(), Toast.LENGTH_SHORT).show();
                 dataAdapter.refreshList(viewPlace);
                 break;
             }
@@ -387,14 +389,15 @@ public class MainActivity extends AppCompatActivity {
         for(MonitoredLocation ml : places){
             s.add(ml.category);
             if(mapToCategory.keySet().contains(ml.category)) {
-                mapToCategory.put(ml.category,
-                        mapToCategory.get(ml.category) + ml.time_spent);
+                int temp = mapToCategory.remove(ml.category);
+                mapToCategory.put(ml.category, temp + ml.time_spent);
             }
             else {
-                mapToCategory.put(ml.category, 0);
+                mapToCategory.put(ml.category, ml.time_spent);
             }
         }
 
+        categories.clear();
         for(String string : mapToCategory.keySet()){
             Category c = new Category(string, mapToCategory.get(string));
             categories.add(c);
