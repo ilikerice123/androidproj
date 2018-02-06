@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.charlesbai321.myapplication.Activities.MainActivity;
 import com.example.charlesbai321.myapplication.Activities.SinglePlaceActivity;
@@ -71,7 +72,7 @@ public class PlaceAdapter extends RecyclerView.Adapter {
             }
         });
         MonitoredLocation place = MainActivity.places.get(position);
-        holder.place_name.setText(place.name);
+        holder.place_name.setText(place.nickName);
         holder.time_spent.setText(place.time_spent/60 + "h " + place.time_spent%60 + "m");
         holder.progressbar.setProgress(place.time_spent * 100 / maximum);
     }
@@ -100,8 +101,62 @@ public class PlaceAdapter extends RecyclerView.Adapter {
     /**
      * hey I can practice implementing different sorting algorithms here :D
      */
-    public void sortList(){
-
+    public void sortListTime(){
+        //quicksort
+        quickSortTime(0,MainActivity.places.size()-1);
         super.notifyDataSetChanged();
+        Toast.makeText(c, "Sorted!", Toast.LENGTH_SHORT).show();
+    }
+
+    private void quickSortTime(int low, int high){
+        if(low < high){
+            int pivot = MainActivity.places.get(high).time_spent;
+            int wall = low;
+            for(int i = low; i < high; i++){
+                if(MainActivity.places.get(i).time_spent > pivot){
+                    MonitoredLocation temp = MainActivity.places.get(wall);
+                    MainActivity.places.set(wall, MainActivity.places.get(i));
+                    MainActivity.places.set(i, temp);
+                    wall++;
+                }
+            }
+
+            MonitoredLocation temp = MainActivity.places.get(high);
+            MainActivity.places.set(high, MainActivity.places.get(wall));
+            MainActivity.places.set(wall, temp);
+
+            quickSortTime(low, wall-1);
+            quickSortTime(wall+1, high);
+        }
+    }
+
+    private void quickSortAlpha(int low, int high){
+        if(low < high){
+            String pivot = MainActivity.places.get(high).nickName;
+            int wall = low;
+            for(int i = low; i < high; i++){
+                if(0 < pivot.compareTo(MainActivity.places.get(i).nickName)){
+                    MonitoredLocation temp = MainActivity.places.get(wall);
+                    MainActivity.places.set(wall, MainActivity.places.get(i));
+                    MainActivity.places.set(i, temp);
+                    wall++;
+                }
+            }
+
+            MonitoredLocation temp = MainActivity.places.get(high);
+            MainActivity.places.set(high, MainActivity.places.get(wall));
+            MainActivity.places.set(wall, temp);
+
+            quickSortAlpha(low, wall-1);
+            quickSortAlpha(wall+1, high);
+        }
+    }
+
+
+
+    public void sortListAlpha(){
+        quickSortAlpha(0,MainActivity.places.size()-1);
+        super.notifyDataSetChanged();
+        Toast.makeText(c, "Sorted!", Toast.LENGTH_SHORT).show();
     }
 }

@@ -1,7 +1,11 @@
 package com.example.charlesbai321.myapplication.Activities;
 
+import android.Manifest;
 import android.arch.persistence.room.Room;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
@@ -10,16 +14,21 @@ import android.widget.Toast;
 import com.example.charlesbai321.myapplication.Data.MonitoredLocation;
 import com.example.charlesbai321.myapplication.R;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 import com.google.android.gms.location.places.ui.PlaceSelectionListener;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
+import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 public class Main2Activity extends AppCompatActivity implements OnMapReadyCallback{
 
@@ -72,6 +81,22 @@ public class Main2Activity extends AppCompatActivity implements OnMapReadyCallba
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.gmap = googleMap;
+        if(ContextCompat.checkSelfPermission(
+                this, Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED){
+
+            FusedLocationProviderClient client =
+                    LocationServices.getFusedLocationProviderClient(this);
+            client.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+                @Override
+                public void onSuccess(Location location) {
+                    CameraUpdate zoom = CameraUpdateFactory.zoomTo(14);
+                    gmap.moveCamera(zoom);
+                    gmap.moveCamera(CameraUpdateFactory.newLatLng(
+                            new LatLng(location.getLatitude(), location.getLongitude())));
+                }
+            });
+        }
         //updates autocomplete widget with only relevant suggestions based on map
         gmap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
             @Override
@@ -98,11 +123,10 @@ public class Main2Activity extends AppCompatActivity implements OnMapReadyCallba
 
                 //refresh list of places
                 MainActivity.places = MainActivity.db.monitoredLocationDao().getListOfLocations();
-                Toast.makeText(this, MainActivity.db.monitoredLocationDao().
-                        getListOfLocations().toString(), Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Add successful", Toast.LENGTH_LONG).show();
             }
             else {
-                Toast.makeText(this, "Error adding place, try again later",
+                Toast.makeText(this, "Error, restart app and try again",
                         Toast.LENGTH_SHORT).show();
             }
         }

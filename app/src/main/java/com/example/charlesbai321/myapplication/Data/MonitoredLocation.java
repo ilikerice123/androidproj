@@ -9,12 +9,16 @@ import android.os.Parcelable;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+
 /**
  * Created by charlesbai321 on 17/01/18.
  */
 
 @Entity(tableName = MonitoredLocation.DATABASE_KEY) //<- this marks it as an entity for Room
 public class MonitoredLocation implements Parcelable {
+    public static final SimpleDateFormat DATEFORMAT = new SimpleDateFormat("yyyyMMdd_HHmmss");
     public static final String DATABASE_KEY = "monitoredlocation_database";
 
     //needs to be unique across different MonitoredLocation objects - name should suffice (?)
@@ -33,6 +37,10 @@ public class MonitoredLocation implements Parcelable {
     public double latitude;
     @ColumnInfo(name = "longitude_position")
     public double longitude;
+    @ColumnInfo(name = "category")
+    public String category;
+    @ColumnInfo(name = "date added")
+    public String startTime;
     @ColumnInfo(name = "time_spent")
     //these are initialized to 0 by default, so it's fine
     public int time_spent;
@@ -54,6 +62,8 @@ public class MonitoredLocation implements Parcelable {
         this.nickName = nickName;
         this.latitude = location.latitude;
         this.longitude = location.longitude;
+        this.category = "default";
+        this.startTime = DATEFORMAT.format(Calendar.getInstance().getTime());
         time_spent = 0;
     }
 
@@ -88,6 +98,18 @@ public class MonitoredLocation implements Parcelable {
                 ", time_spent: " + time_spent + ", lastLogged: " + lastLogged + "]";
     }
 
+    @Override
+    public boolean equals(Object o){
+        if(o instanceof MonitoredLocation){
+            return ((MonitoredLocation) o).getId() == this.id;
+        }
+        else return false;
+    }
+
+    @Override
+    public int hashCode(){
+        return this.toString().hashCode();
+    }
 
     //-----------------------------------------------------------------------
     //stuff below this is just for implementing parcelable

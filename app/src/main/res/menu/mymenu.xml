@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="Sort alphabetical"
+        android:id="@+id/sort_alpha"/>
+
+    <item
+        android:id="@+id/sort_time"
+        android:title="Sort by time" />
+
+    <item android:title="Clear list"
+        android:id="@+id/clear_list" />
+
+    <item android:title="Add a location"
+        android:id="@+id/add_location"/>
+
+    <item android:title="Add a category"
+        android:id="@+id/add_category"/>
+
+</menu>

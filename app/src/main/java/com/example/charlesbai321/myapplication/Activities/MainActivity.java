@@ -28,8 +28,11 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
@@ -47,7 +50,9 @@ import com.example.charlesbai321.myapplication.Util.StartGPSService;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -56,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String LOG = "what_is_going_ONNNN";
     public static final String LOCSTARTSTOP = "are_we_using_gps???";
     public static List<MonitoredLocation> places;
+    public static List<String> categories;
     TextView places_text;
     RecyclerView rv;
     RecyclerView.LayoutManager rvManager;
@@ -78,7 +84,54 @@ public class MainActivity extends AppCompatActivity {
         places_text = findViewById(R.id.setofplaces);
         //initializes the list of places from database
         (new InitializeLocationsTask(this)).execute("dummy string");
+    }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.mymenu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(dataAdapter == null) return true;
+        switch(item.getItemId()){
+            case R.id.sort_time: {
+                dataAdapter.sortListTime();
+                break;
+            }
+            case R.id.sort_alpha: {
+                dataAdapter.sortListAlpha();
+                break;
+            }
+            case R.id.clear_list: {
+                DialogFragment confirmation = new ConfirmPopup();
+                confirmation.show(getFragmentManager(), "confirmation");
+//                if(db != null){
+//                    for(MonitoredLocation ml : places) {
+//                        db.monitoredLocationDao().deleteMonitoredLocations(ml);
+//                    }
+//                    places.clear();
+//                    Toast.makeText(this, "Clear Success", Toast.LENGTH_SHORT).show();
+//                    dataAdapter.refreshList();
+//                }
+//                else Toast.makeText(this,
+//                        "Error, restart app and try again", Toast.LENGTH_SHORT).show();
+                break;
+            }
+            case R.id.add_location: {
+                Intent i = new Intent(this, Main2Activity.class);
+                startActivity(i);
+                break;
+            }
+
+            case R.id.add_category: {
+                AddCategoryPopup categoryPopup = new AddCategoryPopup();
+                categoryPopup.show(getFragmentManager(), "category");
+                break;
+            }
+        }
+        return true;
     }
 
     /**
@@ -92,11 +145,12 @@ public class MainActivity extends AppCompatActivity {
         if(dataAdapter != null) {
             dataAdapter.refreshList();
         }
-        //places_text.setText(places.toString());
+
         //whenever the list of places gets deleted (which it shouldn't), recreate it
         if(places == null) (new InitializeLocationsTask(this))
                 .execute("dummy string");
 
+        //request permissions
         if(!hasPermission(this)){
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.
                     ACCESS_FINE_LOCATION}, GPSService.USE_GPS);
@@ -134,6 +188,7 @@ public class MainActivity extends AppCompatActivity {
     public void startGPSService(View view){
         Intent i = new Intent(this, StartGPSService.class);
         i.putExtra(MainActivity.USE_GPS, true);
+        Toast.makeText(this, "Started tracking locations", Toast.LENGTH_SHORT).show();
         startService(i);
     }
 
@@ -152,34 +207,8 @@ public class MainActivity extends AppCompatActivity {
         }
         Intent i = new Intent(this, StartGPSService.class);
         i.putExtra(MainActivity.USE_GPS, false);
+        Toast.makeText(this, "Stopped tracking locations", Toast.LENGTH_SHORT).show();
         startService(i);
-    }
-
-    /**
-     * method that executes when user presses add location button. launches new activity
-     * @param view
-     */
-    public void addLocation(View view){
-        Intent i = new Intent(this, Main2Activity.class);
-        startActivity(i);
-    }
-
-    /**
-     * clear the list of saved locations - deletes them not only from temporary list
-     * created for recycler view, but also from the database
-     * @param view
-     */
-    public void clearList(View view){
-        if(db != null){
-            for(MonitoredLocation ml : places) {
-                db.monitoredLocationDao().deleteMonitoredLocations(ml);
-            }
-            places.clear();
-            Toast.makeText(this, "Clear Success", Toast.LENGTH_SHORT).show();
-            dataAdapter.refreshList();
-        }
-        else Toast.makeText(this,
-                "Error occured, restart app and try again", Toast.LENGTH_SHORT).show();
     }
 
     /**
@@ -235,6 +264,11 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
             places = db;
+            Set<String> s = new HashSet<>();
+            for(MonitoredLocation ml : places){
+                s.add(ml.category);
+            }
+            categories = new ArrayList<>(s);
             setupRecyclerView();
             dataAdapter.refreshList();
         }
@@ -245,7 +279,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    //NOT NEEDED --------------------------------------------------------------------
+    //PURPOSE CHANGED --------------------------------------------------------------------
     //I originally needed this because I had a START_STICKY service that would continuously
     //run when my app closed, but on xiaomi and huawei phones, there needed to be an extra step
     //in order to allow services to be restarted, which is what this dialog box prompts the user
@@ -262,26 +296,27 @@ public class MainActivity extends AppCompatActivity {
      * Code mostly from android studio
      */
     @SuppressLint("ValidFragment")
-    public class GotoSettingsPopup extends DialogFragment {
+    public class ConfirmPopup extends DialogFragment {
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             String message =
-                    "It seems you are on a HuaWei or Xiaomi phone. Please add it to " +
-                    "the list of allowed apps in the next screen in order for this app " +
-                    "to work properly.";
+                    "Are you sure you want to delete all of your data?";
 
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
             builder.setMessage(message)
-                    .setPositiveButton("Next", new DialogInterface.OnClickListener() {
+                    .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                         //https://stackoverflow.com/questions/40660216/ontaskremoved-not-getting-called-in-huawei-and-xiomi-devices
                         public void onClick(DialogInterface dialog, int id) {
-                            Intent intent = new Intent();
-                            intent.setComponent(new ComponentName("com.miui.securitycenter",
-                                    "com.miui.permcenter.autostart.AutoStartManagementActivity"));
-                            startActivity(intent);
+                            if(db != null){
+                                for(MonitoredLocation ml : places) {
+                                    db.monitoredLocationDao().deleteMonitoredLocations(ml);
+                                }
+                                places.clear();
+                                dataAdapter.refreshList();
+                            }
                         }
                     })
-                    .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             // User cancelled the dialog
                         }
@@ -289,4 +324,39 @@ public class MainActivity extends AppCompatActivity {
             return builder.create();
         }
     }
+
+    //https://developer.android.com/guide/topics/ui/dialogs.html
+    @SuppressLint("ValidFragment")
+    public class AddCategoryPopup extends DialogFragment{
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState){
+            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+            LayoutInflater inflater = getActivity().getLayoutInflater();
+
+            builder.setTitle("Enter a category");
+
+            builder.setView(inflater.inflate(R.layout.addcategory_popup, null))
+                    .setPositiveButton("Add", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int id) {
+                            final EditText et = (EditText)
+                                    AddCategoryPopup.this.getDialog().findViewById(R.id.categoryAdd);
+
+                            String s = et.getText().toString();
+
+                            if(!s.equals("") && !categories.contains(s)){
+                                categories.add(s);
+                            }
+                        }
+                    })
+                    .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            AddCategoryPopup.this.getDialog().cancel();
+                        }
+                    });
+            return builder.create();
+        }
+    }
+
+
 }
