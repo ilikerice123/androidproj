@@ -78,7 +78,7 @@
             android:id="@+id/placetoadd"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="TextView"
+            android:text="Search for a location!"
             tools:layout_editor_absoluteX="51dp"
             tools:layout_editor_absoluteY="447dp" />
 

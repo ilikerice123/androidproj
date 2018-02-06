@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <item android:title="View by category"
+        android:id="@+id/view_category"/>
+
+    <item android:title="View by places"
+        android:id="@+id/view_places"/>
+
     <item android:title="Sort alphabetical"
         android:id="@+id/sort_alpha"/>
 
-    <item
-        android:id="@+id/sort_time"
+    <item android:id="@+id/sort_time"
         android:title="Sort by time" />
 
     <item android:title="Clear list"

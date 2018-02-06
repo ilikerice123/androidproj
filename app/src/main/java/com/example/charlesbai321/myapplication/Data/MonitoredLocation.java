@@ -17,7 +17,7 @@ import java.util.Calendar;
  */
 
 @Entity(tableName = MonitoredLocation.DATABASE_KEY) //<- this marks it as an entity for Room
-public class MonitoredLocation implements Parcelable {
+public class MonitoredLocation implements Parcelable, Displayable {
     public static final SimpleDateFormat DATEFORMAT = new SimpleDateFormat("yyyyMMdd_HHmmss");
     public static final String DATABASE_KEY = "monitoredlocation_database";
 
@@ -146,6 +146,16 @@ public class MonitoredLocation implements Parcelable {
         this.time_spent = Integer.parseInt(data[3]);
         this.latitude = lat;
         this.longitude = lng;
+    }
+
+    @Override
+    public int getTimeSpent() {
+        return time_spent;
+    }
+
+    @Override
+    public String getTitleName() {
+        return nickName;
     }
 }
 

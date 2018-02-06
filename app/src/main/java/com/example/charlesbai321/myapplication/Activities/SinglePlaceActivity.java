@@ -33,7 +33,7 @@ public class SinglePlaceActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_single_place);
 
-        Toast.makeText(this, MainActivity.categories.toString(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, MainActivity.categories_string.toString(), Toast.LENGTH_SHORT).show();
 
         //extract the position of the recycler view that was clicked
         position = getIntent().getExtras().getInt(MainActivity.POSITION_KEY);
@@ -66,12 +66,12 @@ public class SinglePlaceActivity extends AppCompatActivity {
         categorySpinner = findViewById(R.id.spinner);
         //we're using the default spinner xml
         categorySpinnerAdapter = new ArrayAdapter<>(this,
-                R.layout.support_simple_spinner_dropdown_item, MainActivity.categories);
+                R.layout.support_simple_spinner_dropdown_item, MainActivity.categories_string);
         categorySpinner.setAdapter(categorySpinnerAdapter);
         categorySpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener(){
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                String s = MainActivity.categories.get(i);
+                String s = MainActivity.categories_string.get(i);
                 singlePlace.category = s;
                 MainActivity.db.monitoredLocationDao().updatePlace(singlePlace);
             }
@@ -87,7 +87,7 @@ public class SinglePlaceActivity extends AppCompatActivity {
     protected void onResume(){
         super.onResume();
         categorySpinnerAdapter.notifyDataSetChanged();
-        categorySpinner.setSelection(MainActivity.categories.indexOf(singlePlace.category));
+        categorySpinner.setSelection(MainActivity.categories_string.indexOf(singlePlace.category));
     }
 
     @Override

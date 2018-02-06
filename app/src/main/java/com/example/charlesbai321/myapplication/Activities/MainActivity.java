@@ -38,6 +38,8 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.charlesbai321.myapplication.Data.Category;
+import com.example.charlesbai321.myapplication.Data.Displayable;
 import com.example.charlesbai321.myapplication.Data.MonitoredLocationDao;
 import com.example.charlesbai321.myapplication.Data.MonitoredLocationsDatabase;
 import com.example.charlesbai321.myapplication.Util.AlarmReciever;
@@ -50,8 +52,10 @@ import com.example.charlesbai321.myapplication.Util.StartGPSService;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
@@ -61,11 +65,13 @@ public class MainActivity extends AppCompatActivity {
     public static final String LOG = "what_is_going_ONNNN";
     public static final String LOCSTARTSTOP = "are_we_using_gps???";
     public static List<MonitoredLocation> places;
-    public static List<String> categories;
+    public static List<String> categories_string;
+    public static List<Category> categories;
     TextView places_text;
     RecyclerView rv;
     RecyclerView.LayoutManager rvManager;
     PlaceAdapter dataAdapter;
+    boolean viewPlace;
     //might as well just have a database here and try to get rid of it if it's taking up
     //too memory
     static MonitoredLocationsDatabase db;
@@ -80,11 +86,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main); //initializes the display
-
+        viewPlace = true;
         places_text = findViewById(R.id.setofplaces);
         //initializes the list of places from database
         (new InitializeLocationsTask(this)).execute("dummy string");
         categories = new ArrayList<>();
+        categories_string = new ArrayList<>();
+        places = new ArrayList<>();
     }
 
     @Override
@@ -97,6 +105,18 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         if(dataAdapter == null) return true;
         switch(item.getItemId()){
+            case R.id.view_category: {
+                viewPlace = false;
+                dataAdapter.displayCategory();
+                dataAdapter.refreshList(viewPlace);
+                break;
+            }
+            case R.id.view_places: {
+                viewPlace = true;
+                dataAdapter.displayPlace();
+                dataAdapter.refreshList(viewPlace);
+                break;
+            }
             case R.id.sort_time: {
                 dataAdapter.sortListTime();
                 break;
@@ -108,16 +128,6 @@ public class MainActivity extends AppCompatActivity {
             case R.id.clear_list: {
                 DialogFragment confirmation = new ConfirmPopup();
                 confirmation.show(getFragmentManager(), "confirmation");
-//                if(db != null){
-//                    for(MonitoredLocation ml : places) {
-//                        db.monitoredLocationDao().deleteMonitoredLocations(ml);
-//                    }
-//                    places.clear();
-//                    Toast.makeText(this, "Clear Success", Toast.LENGTH_SHORT).show();
-//                    dataAdapter.refreshList();
-//                }
-//                else Toast.makeText(this,
-//                        "Error, restart app and try again", Toast.LENGTH_SHORT).show();
                 break;
             }
             case R.id.add_location: {
@@ -144,7 +154,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume(){
         super.onResume();
         if(dataAdapter != null) {
-            dataAdapter.refreshList();
+            dataAdapter.refreshList(viewPlace);
         }
 
         //whenever the list of places gets deleted (which it shouldn't), recreate it
@@ -153,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
         }
         else{
             for(MonitoredLocation ml : places){
-                if(!categories.contains(ml.category)) categories.add(ml.category);
+                if(!categories_string.contains(ml.category)) categories_string.add(ml.category);
             }
         }
 
@@ -246,6 +256,9 @@ public class MainActivity extends AppCompatActivity {
     //https://stackoverflow.com/questions/16920942/getting-context-in-asynctask
     //from here, because I need to use context to get the database, I'm obtaining a weak
     //reference to the database which will prevent memory leaks
+
+    //AsyncTask also has the job of initializing all of the different lists that this
+    //activity contains, since all of the lists depend on the dataset
     private class InitializeLocationsTask
             extends AsyncTask<String, Void, List<MonitoredLocation>>{
         private final WeakReference<Activity> weakActivity;
@@ -270,14 +283,12 @@ public class MainActivity extends AppCompatActivity {
             if(a == null || a.isFinishing() || a.isDestroyed() || db == null){
                 return;
             }
-            places = db;
-            Set<String> s = new HashSet<>();
-            for(MonitoredLocation ml : places){
-                s.add(ml.category);
-            }
-            categories = new ArrayList<>(s);
+
+            places.addAll(db);
+            refreshCategories();
             setupRecyclerView();
-            dataAdapter.refreshList();
+            dataAdapter.refreshList(viewPlace);
+            Toast.makeText(a, places.toString(), Toast.LENGTH_SHORT).show();
         }
 
         public InitializeLocationsTask(Activity a){
@@ -319,7 +330,7 @@ public class MainActivity extends AppCompatActivity {
                                     db.monitoredLocationDao().deleteMonitoredLocations(ml);
                                 }
                                 places.clear();
-                                dataAdapter.refreshList();
+                                dataAdapter.refreshList(viewPlace);
                             }
                         }
                     })
@@ -351,8 +362,10 @@ public class MainActivity extends AppCompatActivity {
 
                             String s = et.getText().toString();
 
-                            if(!s.equals("") && !categories.contains(s)){
-                                categories.add(s);
+                            if(!s.equals("") && !categories_string.contains(s)){
+                                categories_string.add(s);
+                                Category newCategory = new Category(s, 0);
+                                categories.add(newCategory);
                             }
                         }
                     })
@@ -364,6 +377,33 @@ public class MainActivity extends AppCompatActivity {
             return builder.create();
         }
     }
+
+    private void refreshCategories(){
+        Map<String, Integer> mapToCategory = new HashMap<>();
+        Set<String> s = new HashSet<>();
+
+        if(places == null) return;
+
+        for(MonitoredLocation ml : places){
+            s.add(ml.category);
+            if(mapToCategory.keySet().contains(ml.category)) {
+                mapToCategory.put(ml.category,
+                        mapToCategory.get(ml.category) + ml.time_spent);
+            }
+            else {
+                mapToCategory.put(ml.category, 0);
+            }
+        }
+
+        for(String string : mapToCategory.keySet()){
+            Category c = new Category(string, mapToCategory.get(string));
+            categories.add(c);
+        }
+
+        categories_string = new ArrayList<>(s);
+    }
+
+
 
 
 }

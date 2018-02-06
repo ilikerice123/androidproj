@@ -51,7 +51,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="24dp"
         android:text="TextView"
         android:textAppearance="@style/TextAppearance.AppCompat.Headline"
         app:layout_constraintEnd_toEndOf="parent"
@@ -60,7 +60,7 @@
 
     <TextView
         android:id="@+id/textView6"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:text="Add a category:"
@@ -71,8 +71,9 @@
 
     <TextView
         android:id="@+id/textView7"
-        android:layout_width="106dp"
+        android:layout_width="128dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
         android:text="Set a nickname for your place:"
         app:layout_constraintEnd_toStartOf="@+id/nickname"
         app:layout_constraintHorizontal_bias="0.5"
@@ -81,9 +82,11 @@
 
     <EditText
         android:id="@+id/nickname"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginStart="16dp"
         android:ems="10"
         android:inputType="textPersonName"
         android:text="Name"
@@ -97,7 +100,9 @@
         android:layout_width="215dp"
         android:layout_height="43dp"
         android:layout_marginBottom="16dp"
+        android:layout_marginEnd="16dp"
         app:layout_constraintBottom_toTopOf="@+id/resetSinglePlace"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@+id/nickname" />
 
 </android.support.constraint.ConstraintLayout>
