@@ -58,7 +58,8 @@ public class ParseLocationService extends IntentService {
         }
     }
 
-    //this runs in O(n^2) time, but idk if I can make this any better
+    //this takes 2 for loops to run, which may not be good considering this is
+    //supposed to be a background serviceintent, but idk if I can make this any better
     private void handleLocation(Location l){
         List<MonitoredLocation> places = db.monitoredLocationDao().getListOfLocations();
 

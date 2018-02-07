@@ -32,7 +32,10 @@ import com.google.android.gms.location.LocationSettingsRequest;
  */
 
 /**
- * this class is completely useless now.
+ * this class is completely useless now. XDDD Read below for why
+ *
+ * This has been replaced with a service that starts AlarmManager, of which calls
+ * ParseLocationService
  *
  * Originally, this was how my app was going to request locations every 15 or so minutes,
  * but because services don't run when the CPU is a asleep and obtaining a constant CPU

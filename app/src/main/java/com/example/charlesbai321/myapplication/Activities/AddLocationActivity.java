@@ -1,7 +1,6 @@
 package com.example.charlesbai321.myapplication.Activities;
 
 import android.Manifest;
-import android.arch.persistence.room.Room;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -24,13 +23,13 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-public class Main2Activity extends AppCompatActivity implements OnMapReadyCallback{
+public class AddLocationActivity extends AppCompatActivity implements OnMapReadyCallback,
+        OnSuccessListener<Location>{
 
     Place thisplace;
     PlaceAutocompleteFragment placeSuggestion;
@@ -38,14 +37,18 @@ public class Main2Activity extends AppCompatActivity implements OnMapReadyCallba
     SupportMapFragment mapFragment;
     TextView placetoAdd_text;
 
+    /**
+     * OnCreate() initializes all the different UI elements, including the place autocomplete
+     * fragment and the corresponding onClick callback, the small CardView-wrapped TextView,
+     * as well as initialization for the map object.
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main2);
+        setContentView(R.layout.activity_addlocation);
 
-        //textbox to display the added place
         placetoAdd_text = findViewById(R.id.placetoadd);
-        //autocomplete widget
         placeSuggestion = (PlaceAutocompleteFragment)
                 getFragmentManager().findFragmentById(R.id.places);
 
@@ -53,10 +56,8 @@ public class Main2Activity extends AppCompatActivity implements OnMapReadyCallba
         placeSuggestion.setOnPlaceSelectedListener(new PlaceSelectionListener(){
             @Override
             public void onPlaceSelected(Place place) {
-                //TODO: Do something about the place that has been selected
                 thisplace = place;
-
-                //move the map to the selected place
+                //add a marker and move the camera to the selected place
                 gmap.addMarker(new MarkerOptions().position(place.getLatLng()).
                         title(place.getName().toString()));
                 gmap.moveCamera(CameraUpdateFactory.newLatLng(place.getLatLng()));
@@ -64,20 +65,24 @@ public class Main2Activity extends AppCompatActivity implements OnMapReadyCallba
             }
             @Override
             public void onError(Status status) {
-                //TODO: How does an error even occur???
+                Toast.makeText(getApplicationContext(), "Something wrong has " +
+                        "happened! Restart the app", Toast.LENGTH_SHORT).show();
             }
         });
 
         //map initialization
-        mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        //get it to initialize on another thread (?)
+        mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-
     }
 
-    //https://stackoverflow.com/questions/15319431/how-to-convert-a-latlng-and-a-radius-to-a-latlngbounds-in-android-google-maps-ap
-    //
+    /**
+     * This activity implements OnMapReady, so we implement this callback as a function
+     * of the activity. In this function, we obtain a fusedlocationclient to return us a
+     * location and once we get that location, we center the map around it. In addition,
+     * setOnCameraIdleListener() makes it so when the map is moved around, the autocomplete
+     * widget results reflect the map location
+     * @param googleMap
+     */
     @Override
     public void onMapReady(GoogleMap googleMap) {
         this.gmap = googleMap;
@@ -87,41 +92,36 @@ public class Main2Activity extends AppCompatActivity implements OnMapReadyCallba
 
             FusedLocationProviderClient client =
                     LocationServices.getFusedLocationProviderClient(this);
-            client.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
-                @Override
-                public void onSuccess(Location location) {
-                    CameraUpdate zoom = CameraUpdateFactory.zoomTo(14);
-                    gmap.moveCamera(zoom);
-                    gmap.moveCamera(CameraUpdateFactory.newLatLng(
-                            new LatLng(location.getLatitude(), location.getLongitude())));
-                }
-            });
+            client.getLastLocation().addOnSuccessListener(this);
         }
         //updates autocomplete widget with only relevant suggestions based on map
         gmap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
             @Override
             public void onCameraIdle() {
-                CameraPosition cp = gmap.getCameraPosition();
                 LatLngBounds bounds = gmap.getProjection().getVisibleRegion().latLngBounds;
                 placeSuggestion.setBoundsBias(bounds);
             }
         });
     }
 
-
-    //this is called by clicking on the button, initialized it there as not to clutter activity
-
+    /**
+     * Function for the addPlace button. When clicked, it checks if the user has selected a
+     * location. If he has, then we create a MonitoredLocation object around that place,
+     * feed it into our Room Database to generate a unique private ID, and reload the
+     * dependent places (list) in the MainActivity. We don't have to refresh any of the other
+     * data structures in MainActivity because that is done in MainActivity.onResume()
+     *
+     * If the user hasn't selected a place, then just return to main screen with finish()
+     * @param view
+     */
     public void addPlace(View view){
         if(thisplace != null) {
             MonitoredLocation monitoredplace = new MonitoredLocation(thisplace.getName().toString(),
                     thisplace.getName().toString(), thisplace.getLatLng());
+
             if(MainActivity.db != null) {
                 MainActivity.db.monitoredLocationDao().insertAll(monitoredplace);
-                //^after it is inserted to the database, I have to load the list of places again
-                //and this is the only place where I change my list, so the list is only updated
-                //through the database and not by any other means
 
-                //refresh list of places
                 MainActivity.places = MainActivity.db.monitoredLocationDao().getListOfLocations();
                 Toast.makeText(this, "Add successful", Toast.LENGTH_LONG).show();
             }
@@ -131,5 +131,17 @@ public class Main2Activity extends AppCompatActivity implements OnMapReadyCallba
             }
         }
         finish();
+    }
+
+    /**
+     * after successful obtaining of location, centers map around the location, at a bigger zoom
+     * @param location
+     */
+    @Override
+    public void onSuccess(Location location) {
+        CameraUpdate zoom = CameraUpdateFactory.zoomTo(14);
+        gmap.moveCamera(zoom);
+        gmap.moveCamera(CameraUpdateFactory.newLatLng(
+                new LatLng(location.getLatitude(), location.getLongitude())));
     }
 }

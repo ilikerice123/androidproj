@@ -25,16 +25,30 @@ import java.util.List;
  * Created by charlesbai321 on 17/01/18.
  */
 
+/**
+ * Comments:
+ *
+ * Because I wanted my PlaceAdapter to be able to display information for both different
+ * categories as well as different different places, I needed an internal list structure that
+ * can hold both of these. Originally, PlaceAdapter didn't even have its own internal list, and
+ * instead just called the MainActivity's static list of places. But because I wanted it to
+ * display categories as well, I created an interface called Displayable that both Category
+ * and MonitoredLocation implement, and now I have an internal list of that type to display the
+ * information.
+ */
 public class PlaceAdapter extends RecyclerView.Adapter {
+
+    public static final String NEW_CATEGORY_OPTION = "New category...";
 
     //used as a reference for how to display progress
     private int maximum = 0;
     //used to create intents to launch other activities within this adapter
     private Context c;
     private List<Displayable> listtoDisplay;
+    //this flag is so that when I'm displaying categories, I can't launch new activities by
+    //clicking on the individual cardviews - you can only do that when you're viewing pictures
     private boolean clickable;
 
-    //might need more stuff later who knows
     public PlaceAdapter(Context c){
         this.c = c;
         listtoDisplay = new ArrayList<>();
@@ -43,16 +57,22 @@ public class PlaceAdapter extends RecyclerView.Adapter {
         listtoDisplay.addAll(MainActivity.places);
     }
 
+    /**
+     * these two functions are used to toggle between displaying categories, and displaying
+     * individual places
+     */
     public void displayCategory(){
         clickable = false;
         listtoDisplay.clear();
         listtoDisplay.addAll(MainActivity.categories);
+        super.notifyDataSetChanged();
     }
 
     public void displayPlace(){
         clickable = true;
         listtoDisplay.clear();
         listtoDisplay.addAll(MainActivity.places);
+        super.notifyDataSetChanged();
     }
 
     //initializes view of a single item in recycler view and returns it as a ViewHolder
@@ -63,8 +83,10 @@ public class PlaceAdapter extends RecyclerView.Adapter {
         return new placesHolder(cv);
     }
 
-    //has a bunch of public members that are used to reference specific UI elements
-    //in a single "item xml"
+    /**
+     * wrapper class for a single recyclerview-cardview-holder type thing (honestly have
+     * no idea what it's called)
+     */
     public static class placesHolder extends RecyclerView.ViewHolder {
         protected TextView place_name;
         protected ProgressBar progressbar;
@@ -76,25 +98,20 @@ public class PlaceAdapter extends RecyclerView.Adapter {
             progressbar = itemView.findViewById(R.id.placeProgress);
             time_spent = itemView.findViewById(R.id.time_spent);
         }
-
     }
+
+    /** Initialization of a new cardview. This sets the necessary text and also, if
+     *  we are displaying locations as indicated by the flag, set an onClickListener
+     *  for the different cards.
+     * @param h
+     * @param position
+     */
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder h, final int position) {
         placesHolder holder = (placesHolder) h; //this cast shouldn't be necessary
         //but for some reason although placesHolder extended viewholder, it was giving
         //me an error :/
         final int clickedposition = position;
-
-        h.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(!clickable) return;
-
-                Intent i = new Intent(c, SinglePlaceActivity.class);
-                i.putExtra(MainActivity.POSITION_KEY, clickedposition);
-                c.startActivity(i);
-            }
-        });
 
         Displayable place = this.listtoDisplay.get(position);
 
@@ -104,6 +121,20 @@ public class PlaceAdapter extends RecyclerView.Adapter {
         else holder.time_spent.setText(time/60 + "h " + time%60 + "m");
 
         holder.progressbar.setProgress(time * 100 / maximum);
+
+        if(!clickable) return;
+
+        h.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(!clickable) return;
+
+                MainActivity.categories_string.add(0, NEW_CATEGORY_OPTION);
+                Intent i = new Intent(c, SinglePlaceActivity.class);
+                i.putExtra(MainActivity.POSITION_KEY, clickedposition);
+                c.startActivity(i);
+            }
+        });
     }
 
     @Override
@@ -112,18 +143,17 @@ public class PlaceAdapter extends RecyclerView.Adapter {
     }
 
 
-    //refreshes the list, setting a new max progress bar value
+    /**
+     * Basically a wrapper around notifyDataSetChanged. I would've overriden
+     * notifyDataSetChanged, but that function was a final function, so thus I just call
+     * it at the end after I execute my logic. Basically, when the data is updated, there is
+     * a chance that the new max for time_spent changes from what it was before, thereby
+     * meaning the calculation I do for the progressbar element will be off, so I have to
+     * recalculate the max.
+     * @param viewPlace
+     */
     public void refreshList(boolean viewPlace){
         if(listtoDisplay == null) return;
-
-        if(viewPlace) {
-            listtoDisplay.clear();
-            listtoDisplay.addAll(MainActivity.places);
-        }
-        else {
-            listtoDisplay.clear();
-            listtoDisplay.addAll(MainActivity.categories);
-        }
 
         int max = 1;
         for(Displayable d : listtoDisplay){
@@ -137,6 +167,9 @@ public class PlaceAdapter extends RecyclerView.Adapter {
 
     /**
      * hey I can practice implementing different sorting algorithms here :D
+     *
+     * These next methods are called when the user selects to sort the data in a certain way
+     * Using quicksort and 2 helper recursive functions to implement it
      */
     public void sortListTime(){
         //quicksort

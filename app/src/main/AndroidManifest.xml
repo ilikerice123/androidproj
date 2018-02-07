@@ -2,9 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.charlesbai321.myapplication">
 
-    <uses-feature
-        android:name="android.hardware.camera"
-        android:required="true" />
     <uses-feature android:name="android.hardware.location.gps" />
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -36,23 +33,13 @@
          this is needed to specify that this is an activity and mainactivity is the logical
          parent of the activity
         -->
-        <activity
-            android:name=".Activities.DisplayMessageActivity"
-            android:parentActivityName=".Activities.MainActivity"
-            android:screenOrientation="portrait">
-
-            <!-- The meta-data tag is required if you support API level 15 and lower -->
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".Activities.MainActivity" />
-        </activity>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyA1gKANMym6L8DRdnraCMe2DQqBFd3EsJQ" />
 
         <activity
-            android:name=".Activities.Main2Activity"
+            android:name=".Activities.AddLocationActivity"
             android:label="@string/title_activity_main2"
             android:parentActivityName=".Activities.MainActivity"
             android:theme="@style/AppTheme.NoActionBar"
@@ -61,14 +48,6 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.example.charlesbai321.myapplication.Activities.MainActivity" />
         </activity>
-        <!--
-        I don't need this anymore
-        <receiver android:name=".Util.AlarmReciever">
-            <intent-filter>
-                <action android:name="com.example.broadcast.WHATDOIPUTHERE"/>
-            </intent-filter>
-        </receiver>
-        -->
         <service
             android:name=".Util.GPSService"
             android:stopWithTask="false" />

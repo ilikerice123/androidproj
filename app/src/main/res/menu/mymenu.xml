@@ -19,7 +19,4 @@
     <item android:title="Add a location"
         android:id="@+id/add_location"/>
 
-    <item android:title="Add a category"
-        android:id="@+id/add_category"/>
-
 </menu>
