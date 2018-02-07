@@ -1,3 +1,3 @@
 # androidproj
 
-Currently, the app prompts you to select a location, and based on GPS information, tells you how far you are from said location. 
+Currently, you select locations and press start so the app tracks how long you spend at each location. Can give the locations nicknames, as well as separate them into different categories and view them that way. 
