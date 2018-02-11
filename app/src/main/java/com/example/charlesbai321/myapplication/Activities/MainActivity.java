@@ -40,6 +40,12 @@ import java.util.Map;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
+    //what's the state of the recyclerview?
+
+    public enum ViewState {
+        DEFAULT, TIME_SORTED, ALPH_SORTED
+    }
+    ViewState state;
 
     //bunch of string constants
     public static final String USE_GPS = "use_gps";
@@ -75,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main); //initializes the display
+        state = ViewState.DEFAULT;
     }
 
     /**
@@ -109,10 +116,12 @@ public class MainActivity extends AppCompatActivity {
                 break;
             }
             case R.id.sort_time: {
+                state = ViewState.TIME_SORTED;
                 dataAdapter.sortListTime();
                 break;
             }
             case R.id.sort_alpha: {
+                state = ViewState.TIME_SORTED;
                 dataAdapter.sortListAlpha();
                 break;
             }
@@ -267,6 +276,8 @@ public class MainActivity extends AppCompatActivity {
             refreshCategories();
             setupRecyclerView();
             dataAdapter.refreshList(viewPlace);
+            if(state == ViewState.TIME_SORTED) dataAdapter.sortListTime();
+            if (state == ViewState.ALPH_SORTED) dataAdapter.sortListAlpha();
         }
 
         public InitializeLocationsTask(Activity a){

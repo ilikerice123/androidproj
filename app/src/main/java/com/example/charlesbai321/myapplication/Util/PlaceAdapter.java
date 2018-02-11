@@ -128,10 +128,20 @@ public class PlaceAdapter extends RecyclerView.Adapter {
             @Override
             public void onClick(View view) {
                 if(!clickable) return;
-
                 MainActivity.categories_string.add(0, NEW_CATEGORY_OPTION);
+
+                MonitoredLocation ml =(MonitoredLocation) listtoDisplay.get(clickedposition);
+
+                //TODO: because displayed list is not linked to main list, sorting the displayed
+                //TODO: list messes up the retrieval of the monitoredlocation. this fixes it in
+                //TODO: somewhat of an awkward fashion
+                int index = 0;
+                for(MonitoredLocation clicked : MainActivity.places){
+                    if(clicked.getId() == ml.getId()) break;
+                    index++;
+                }
                 Intent i = new Intent(c, SinglePlaceActivity.class);
-                i.putExtra(MainActivity.POSITION_KEY, clickedposition);
+                i.putExtra(MainActivity.POSITION_KEY, index);
                 c.startActivity(i);
             }
         });
@@ -175,8 +185,13 @@ public class PlaceAdapter extends RecyclerView.Adapter {
         //quicksort
         quickSortTime(0,listtoDisplay.size()-1);
         super.notifyDataSetChanged();
-        Toast.makeText(c, "Sorted!", Toast.LENGTH_SHORT).show();
     }
+
+    public void sortListAlpha(){
+        quickSortAlpha(0,listtoDisplay.size()-1);
+        super.notifyDataSetChanged();
+    }
+
 
     private void quickSortTime(int low, int high){
         if(low < high){
@@ -225,9 +240,4 @@ public class PlaceAdapter extends RecyclerView.Adapter {
         }
     }
 
-    public void sortListAlpha(){
-        quickSortAlpha(0,listtoDisplay.size()-1);
-        super.notifyDataSetChanged();
-        Toast.makeText(c, "Sorted!", Toast.LENGTH_SHORT).show();
-    }
 }
