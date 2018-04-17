@@ -23,20 +23,26 @@ import com.example.charlesbai321.myapplication.Activities.MainActivity;
  */
 public class StartGPSService extends IntentService {
 
-    public final int FIVE_MINUTES = 5*60*1000;
+    public final int FIVE_MINUTES = 20*1000/*5*60*1000*/;
 
     public StartGPSService(){
         super("StartGPSService");
     }
 
+    //this is done on a background thread
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
         boolean start = intent.getExtras().getBoolean(MainActivity.USE_GPS);
+
+
         AlarmManager am = (AlarmManager)
                 getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+
         Intent i = new Intent(getApplicationContext(), ParseLocationService.class);
+
         PendingIntent pi = PendingIntent.getService(getApplicationContext(), 0,
                 i, PendingIntent.FLAG_UPDATE_CURRENT);
+
         if(start) {
             Log.d(MainActivity.LOG, "started logging service");
             Toast.makeText(this, "Started Logging!", Toast.LENGTH_SHORT).show();

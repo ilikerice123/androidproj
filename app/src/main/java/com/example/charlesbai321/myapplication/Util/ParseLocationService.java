@@ -30,16 +30,17 @@ public class ParseLocationService extends IntentService {
 
     MonitoredLocationsDatabase db;
 
+    //dam I didn't write any comments so not too sure what this does
     public ParseLocationService(){
         super("ParseLocationService");
     }
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        Log.d(MainActivity.LOG, "executed :D");
         //Do nothing if we don't have permission
         if(ContextCompat.checkSelfPermission(getApplicationContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED){
+            Log.d(MainActivity.LOG, "executed :D");
 
             db = Room.databaseBuilder(this,
                     MonitoredLocationsDatabase.class, MonitoredLocation.DATABASE_KEY)
@@ -66,8 +67,8 @@ public class ParseLocationService extends IntentService {
         double shortestDistance = Double.MAX_VALUE;
         MonitoredLocation closestLocation = null;
 
-        //by the end of this for loop, closest location will hold the monitoredlocation that
-        //is closest to the current location, or null if no monitoredlocations are within
+        // by the end of this for loop, closest location will hold the monitoredlocation that
+        // is closest to the current location, or null if no monitoredlocations are within
         // 75 meters of current location
         for(MonitoredLocation ml : places){
             //create location object for monitoredlocation
@@ -96,7 +97,7 @@ public class ParseLocationService extends IntentService {
             //if this was the last logged, then we're going to assume the user didn't move
             if(closestLocation.lastLogged) closestLocation.time_spent +=
                     (sysTime - closestLocation.timeLastUpdated)/(1000*60);
-            //arbituary constant which would be the time the user took to get to his current
+            //arbitrary constant which would be the time the user took to get to his current
             //location
             else closestLocation.time_spent +=
                     (sysTime - closestLocation.timeLastUpdated)/(2*1000*60);

@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import com.example.charlesbai321.myapplication.Data.Category;
 import com.example.charlesbai321.myapplication.Data.MonitoredLocationsDatabase;
+import com.example.charlesbai321.myapplication.Util.DataTransfer;
 import com.example.charlesbai321.myapplication.Util.GPSService;
 import com.example.charlesbai321.myapplication.Data.MonitoredLocation;
 import com.example.charlesbai321.myapplication.Util.PlaceAdapter;
@@ -39,7 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements DataTransfer {
     //what's the state of the recyclerview?
 
     public enum ViewState {
@@ -303,7 +304,7 @@ public class MainActivity extends AppCompatActivity {
      * Code mostly from android studio
      */
     @SuppressLint("ValidFragment")
-    public class ConfirmPopup extends DialogFragment {
+    public static class ConfirmPopup extends DialogFragment {
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             String message =
@@ -319,7 +320,8 @@ public class MainActivity extends AppCompatActivity {
                                     db.monitoredLocationDao().deleteMonitoredLocations(ml);
                                 }
                                 places.clear();
-                                dataAdapter.refreshList(viewPlace);
+                                DataTransfer dt = (DataTransfer) getActivity();
+                                dt.updateList();
                             }
                         }
                     })
@@ -373,6 +375,16 @@ public class MainActivity extends AppCompatActivity {
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED;
     }
 
+    /**
+     *
+     */
+    public void updateData(String s){
+        //do nothing, updateData is for the other dialog fragment which saves a string, this one doesn't
+    }
+
+    public void updateList(){
+        dataAdapter.refreshList(viewPlace);
+    }
 
 
 

@@ -19,14 +19,14 @@ import android.widget.Toast;
 import com.example.charlesbai321.myapplication.Data.Category;
 import com.example.charlesbai321.myapplication.Data.MonitoredLocation;
 import com.example.charlesbai321.myapplication.R;
+import com.example.charlesbai321.myapplication.Util.DataTransfer;
 import com.example.charlesbai321.myapplication.Util.PlaceAdapter;
 
 import java.text.DateFormatSymbols;
 import java.util.Calendar;
-import java.util.Date;
 
 public class SinglePlaceActivity extends AppCompatActivity
-        implements AdapterView.OnItemSelectedListener {
+        implements AdapterView.OnItemSelectedListener, DataTransfer {
 
     int position;
     TextView singlePlaceName;
@@ -47,6 +47,71 @@ public class SinglePlaceActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_single_place);
         setUpView();
+    }
+
+
+    private void setUpView(){
+
+        //extract the position of the recycler view that was clicked from the intent
+        position = getIntent().getExtras().getInt(MainActivity.POSITION_KEY);
+        singlePlaceName = findViewById(R.id.singleplaceName);
+
+        //get place from position according to the list, and set it to the title
+        singlePlace = MainActivity.places.get(position);
+        singlePlaceName.setText(singlePlace.name);
+
+        //set nickname
+        singlePlaceNickName = findViewById(R.id.nickname);
+        singlePlaceNickName.setText(singlePlace.nickName);
+
+        //create a short textView that shows a bit more detailed information
+        singlePlaceDesc = findViewById(R.id.description);
+        String startTime = singlePlace.startTime;
+        String year = startTime.substring(0, 4);
+        String month = (new DateFormatSymbols()).getMonths()
+                [Integer.parseInt(startTime.substring(4, 6))-1];
+        int day = Integer.parseInt(startTime.substring(6,8));
+
+        //this is so fricken ugly holy crap
+        int time = singlePlace.time_spent;
+
+        if(time / 60 == 1){
+            if(time % 60 == 1){ //both singular
+                singlePlaceDesc.setText("Starting from " + year + " " + month + " " + day + ", you have spent " +
+                        singlePlace.time_spent / 60 + " hour and " + singlePlace.time_spent % 60 +
+                        " minute at " + singlePlace.name);
+            }
+            else{  //hours singular
+                singlePlaceDesc.setText("Starting from " + year + " " + month + " " + day + ", you have spent " +
+                        singlePlace.time_spent / 60 + " hour and " + singlePlace.time_spent % 60 +
+                        " minutes at " + singlePlace.name);
+            }
+        }
+        else{
+            if(time % 60 == 1){ //minutes singular
+                singlePlaceDesc.setText("Starting from " + year + " " + month + " " + day + ", you have spent " +
+                        singlePlace.time_spent / 60 + " hour and " + singlePlace.time_spent % 60 +
+                        " minutes at " + singlePlace.name);
+            }
+            else{  //both plural
+                singlePlaceDesc.setText("Starting from " + year + " " + month + " " + day + ", you have spent " +
+                        singlePlace.time_spent / 60 + " hours and " + singlePlace.time_spent % 60 +
+                        " minutes at " + singlePlace.name);
+            }
+        }
+
+        //get reference to spinner (why is it even called a spinner?)
+        categorySpinner = findViewById(R.id.spinner);
+        //add an option for creating a new category
+        MainActivity.categories_string.add(0, PlaceAdapter.NEW_CATEGORY_OPTION);
+
+        //we're using the default spinner xml
+        categorySpinnerAdapter = new ArrayAdapter<>(this,
+                R.layout.support_simple_spinner_dropdown_item, MainActivity.categories_string);
+        categorySpinner.setAdapter(categorySpinnerAdapter);
+
+        //godbless implementing activity functions. It makes code so much cleaner!!!
+        categorySpinner.setOnItemSelectedListener(this);
     }
 
     /**
@@ -127,7 +192,7 @@ public class SinglePlaceActivity extends AppCompatActivity
      * to the spinner, selected as the choice for the spinner, and updated within the database
      */
     @SuppressLint("ValidFragment")
-    public class AddCategoryPopup extends DialogFragment {
+    public static class AddCategoryPopup extends DialogFragment {
         @Override
         public Dialog onCreateDialog(Bundle savedInstanceState){
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -139,18 +204,14 @@ public class SinglePlaceActivity extends AppCompatActivity
                     .setPositiveButton("Add", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int id) {
-                            final EditText et = (EditText)
-                                    AddCategoryPopup.this.getDialog().findViewById(R.id.categoryAdd);
+                            final EditText et = AddCategoryPopup.this.getDialog().
+                                    findViewById(R.id.categoryAdd);
 
                             String s = et.getText().toString();
 
                             if(!s.equals("") && !MainActivity.categories_string.contains(s)){
-                                MainActivity.categories_string.add(s);
-                                Category newCategory = new Category(s, 0);
-                                MainActivity.categories.add(newCategory);
-                                categorySpinner.setSelection(MainActivity.categories_string.size()-1);
-                                singlePlace.category = s;
-                                MainActivity.db.monitoredLocationDao().updatePlace(singlePlace);
+                                DataTransfer dt = (DataTransfer) getActivity();
+                                dt.updateData(s); //send this data over to the activity
                             }
                         }
                     })
@@ -159,69 +220,29 @@ public class SinglePlaceActivity extends AppCompatActivity
                             AddCategoryPopup.this.getDialog().cancel();
                         }
                     });
+
             return builder.create();
         }
     }
 
-    private void setUpView(){
+    //http://android-coding.blogspot.ca/2012/07/dialogfragment-with-interface-to-pass.html
 
-        //extract the position of the recycler view that was clicked from the intent
-        position = getIntent().getExtras().getInt(MainActivity.POSITION_KEY);
-        singlePlaceName = findViewById(R.id.singleplaceName);
+    /**
+     * For when the dialog fragment completes: we can update the data
+     */
+    @Override
+    public void updateData(String data){
+        MainActivity.categories_string.add(data);
+        Category newCategory = new Category(data, 0);
+        MainActivity.categories.add(newCategory);
+        categorySpinner.setSelection(MainActivity.categories_string.size()-1);
+        singlePlace.category = data;
+        MainActivity.db.monitoredLocationDao().updatePlace(singlePlace);
+    }
 
-        //get place from position according to the list, and set it to the title
-        singlePlace = MainActivity.places.get(position);
-        singlePlaceName.setText(singlePlace.name);
-
-        //set nickname
-        singlePlaceNickName = findViewById(R.id.nickname);
-        singlePlaceNickName.setText(singlePlace.nickName);
-
-        //create a short textView that shows a bit more detailed information
-        singlePlaceDesc = findViewById(R.id.description);
-        String startTime = singlePlace.startTime;
-        String year = startTime.substring(0, 4);
-        String month = (new DateFormatSymbols()).getMonths()
-                [Integer.parseInt(startTime.substring(4, 6))-1];
-        int day = Integer.parseInt(startTime.substring(6,8));
-
-        //this is so fricken ugly holy crap
-        int time = singlePlace.time_spent;
-
-        if(time / 60 == 1){
-            if(time % 60 == 1){ //both singular
-                singlePlaceDesc.setText("Starting from " + year + " " + month + " " + day + ", you have spent " +
-                        singlePlace.time_spent / 60 + " hour and " + singlePlace.time_spent % 60 +
-                        " minute at " + singlePlace.name);
-            }
-            else{  //hours singular
-                singlePlaceDesc.setText("Starting from " + year + " " + month + " " + day + ", you have spent " +
-                        singlePlace.time_spent / 60 + " hour and " + singlePlace.time_spent % 60 +
-                        " minutes at " + singlePlace.name);
-            }
-        }
-        else{
-            if(time % 60 == 1){ //minutes singular
-                singlePlaceDesc.setText("Starting from " + year + " " + month + " " + day + ", you have spent " +
-                        singlePlace.time_spent / 60 + " hour and " + singlePlace.time_spent % 60 +
-                        " minutes at " + singlePlace.name);
-            }
-            else{  //both plural
-                singlePlaceDesc.setText("Starting from " + year + " " + month + " " + day + ", you have spent " +
-                        singlePlace.time_spent / 60 + " hours and " + singlePlace.time_spent % 60 +
-                        " minutes at " + singlePlace.name);
-            }
-        }
-
-        //get reference to spinner (why is it even called a spinner?)
-        categorySpinner = findViewById(R.id.spinner);
-        //we're using the default spinner xml
-        categorySpinnerAdapter = new ArrayAdapter<>(this,
-                R.layout.support_simple_spinner_dropdown_item, MainActivity.categories_string);
-        categorySpinner.setAdapter(categorySpinnerAdapter);
-
-        //godbless implementing activity functions. It makes code so much cleaner!!!
-        categorySpinner.setOnItemSelectedListener(this);
+    @Override
+    public void updateList(){
+        //do nothing, this is for the other DialogFragment
     }
 
     /**
@@ -243,7 +264,6 @@ public class SinglePlaceActivity extends AppCompatActivity
         singlePlace.category = s;
         MainActivity.db.monitoredLocationDao().updatePlace(singlePlace);
     }
-
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {
         //nothing happens, I shouldn't need to add anything

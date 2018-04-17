@@ -128,7 +128,7 @@ public class PlaceAdapter extends RecyclerView.Adapter {
             @Override
             public void onClick(View view) {
                 if(!clickable) return;
-                MainActivity.categories_string.add(0, NEW_CATEGORY_OPTION);
+
 
                 MonitoredLocation ml =(MonitoredLocation) listtoDisplay.get(clickedposition);
 
@@ -136,6 +136,7 @@ public class PlaceAdapter extends RecyclerView.Adapter {
                 //TODO: list messes up the retrieval of the monitoredlocation. this fixes it in
                 //TODO: somewhat of an awkward fashion
                 int index = 0;
+                //find the id of the place clicked
                 for(MonitoredLocation clicked : MainActivity.places){
                     if(clicked.getId() == ml.getId()) break;
                     index++;
