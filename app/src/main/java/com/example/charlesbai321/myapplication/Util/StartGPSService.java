@@ -23,7 +23,7 @@ import com.example.charlesbai321.myapplication.Activities.MainActivity;
  */
 public class StartGPSService extends IntentService {
 
-    public final int FIVE_MINUTES = 20*1000/*5*60*1000*/;
+    public final int FIVE_MINUTES = 5*60*1000;
 
     public StartGPSService(){
         super("StartGPSService");
@@ -38,23 +38,27 @@ public class StartGPSService extends IntentService {
         AlarmManager am = (AlarmManager)
                 getApplicationContext().getSystemService(Context.ALARM_SERVICE);
 
-        Intent i = new Intent(getApplicationContext(), ParseLocationService.class);
+        Intent i = new Intent(getApplicationContext(), AlarmReceiver.class);
 
-        PendingIntent pi = PendingIntent.getService(getApplicationContext(), 0,
+        PendingIntent pi = PendingIntent.getBroadcast(this, 0,
                 i, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        if(am == null) {
+            Toast.makeText(this, "Something went wrong, try again later",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         if(start) {
             Log.d(MainActivity.LOG, "started logging service");
-            Toast.makeText(this, "Started Logging!", Toast.LENGTH_SHORT).show();
             am.setInexactRepeating(AlarmManager.ELAPSED_REALTIME,
                     SystemClock.elapsedRealtime() + FIVE_MINUTES, FIVE_MINUTES, pi);
+            Toast.makeText(this, "Started Logging!", Toast.LENGTH_SHORT).show();
         }
         else {
-            if(am != null){
-                Log.d(MainActivity.LOG, "removing logging service");
-                Toast.makeText(this, "Stopped Logging!", Toast.LENGTH_SHORT).show();
-                am.cancel(pi);
-            }
+            Log.d(MainActivity.LOG, "removing logging service");
+            am.cancel(pi);
+            Toast.makeText(this, "Stopped Logging!", Toast.LENGTH_SHORT).show();
         }
     }
 }

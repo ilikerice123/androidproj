@@ -182,7 +182,8 @@ public class MainActivity extends AppCompatActivity implements DataTransfer {
                 if (grantResults.length > 0 && grantResults[0] ==
                         PackageManager.PERMISSION_GRANTED) {
                     //TODO: Code here to initialize GPS service
-                } else {
+                }
+                else {
                     finish();
                 }
             }

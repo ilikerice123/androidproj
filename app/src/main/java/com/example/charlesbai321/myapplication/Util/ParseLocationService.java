@@ -48,6 +48,7 @@ public class ParseLocationService extends IntentService {
 
             FusedLocationProviderClient client =
                     LocationServices.getFusedLocationProviderClient(getApplicationContext());
+
             client.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
                         @Override
                         public void onSuccess(Location location) {

@@ -18,12 +18,12 @@ import com.example.charlesbai321.myapplication.Activities.MainActivity;
  * but we don't need that anymore because we are not using a persistence service to
  * request GPS
  */
-//TODO: add to manifest file
-public class AlarmReciever extends BroadcastReceiver{
+
+public class AlarmReceiver extends BroadcastReceiver{
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.d("ALARMMANAGERRECIEVED", "Hi charles");
-        Toast.makeText(context, "HI CHARLES", Toast.LENGTH_LONG).show();
+
+        Log.d(MainActivity.LOG, "Hi charles");
 
         Intent i = new Intent(context, GPSService.class);
         i.putExtra(MainActivity.LOCSTARTSTOP, true);

@@ -53,7 +53,7 @@
             android:stopWithTask="false" />
         <service android:name=".Util.ParseLocationService" />
         <service android:name=".Util.StartGPSService" />
-
+        <receiver android:name=".Util.AlarmReceiver" />
         <activity
             android:name=".Activities.SinglePlaceActivity"
             android:screenOrientation="portrait"
